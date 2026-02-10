@@ -12,8 +12,10 @@ MyProject -claude     # open Claude Code in the project directory
 
 ### 1. Clone and unblock
 
+Clone the repo to a permanent location — this folder becomes your shortcuts hub. The shortcut scripts you create will live here alongside MyShortcuts itself.
+
 ```powershell
-git clone https://github.com/your-username/MyShortcuts.git
+git clone https://github.com/nicenemo/MyShortcuts.git
 cd MyShortcuts
 Get-ChildItem -Path .\ -Recurse -Filter *.ps1 | Unblock-File
 ```
@@ -24,12 +26,12 @@ Get-ChildItem -Path .\ -Recurse -Filter *.ps1 | Unblock-File
 .\MyShortcuts.ps1 -init
 ```
 
-This adds MyShortcuts to your `PATH` and prompts you to configure:
+This adds the MyShortcuts folder to your `PATH` and prompts you to configure:
 - **Base development folder** — where your projects live (e.g. `C:\_developing\GitHub`)
 - **Editor path** — editor for opening scripts (defaults to `notepad.exe`)
 - **Tunnel name** — default Cloudflared tunnel name (optional)
 
-After init, you can call `MyShortcuts` from anywhere.
+After init, you can call `MyShortcuts` and any shortcut you create from anywhere.
 
 ### 3. Create your first shortcut
 
@@ -43,7 +45,9 @@ The interactive wizard walks you through:
 3. Answer a few config prompts (project folder, solution name)
 4. Optionally add custom commands and a group trigger like `-all`
 
-This creates a `.ps1` file you can run by name from any terminal.
+This creates a `.ps1` file in the MyShortcuts folder that you can run by name from any terminal.
+
+> Your generated shortcut scripts are personal to your setup. Consider adding them to a private fork or your own repo, or simply add them to `.gitignore` if you want to keep pulling updates from this repo.
 
 ## Usage
 
