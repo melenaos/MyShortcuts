@@ -1,0 +1,87 @@
+[
+  {
+    "id": "directory",
+    "label": "Directory \u2014 open project folder (-d)",
+    "snippet": "directory.ps1",
+    "params": [
+      { "name": "directory", "alias": "d", "type": "switch" }
+    ]
+  },
+   {
+    "id": "explorer",
+    "label": "Directory \u2014 open project folder in explorer (-exp)",
+    "snippet": "explorer.ps1",
+    "params": [
+      { "name": "explorer", "alias": "exp", "type": "switch" }
+    ]
+  },
+  {
+    "id": "project",
+    "label": "Project \u2014 open solution in Visual Studio (-p)",
+    "snippet": "project.ps1",
+    "params": [
+      { "name": "project", "alias": "p", "type": "switch" }
+    ],
+    "configVars": ["baseDir"],
+    "prompts": [
+      { "var": "projectName", "prompt": "Solution name (e.g. MyProject.sln)" }
+    ]
+  },
+  {
+    "id": "ui",
+    "label": "UI \u2014 open frontend in VS Code (-ui)",
+    "snippet": "ui.ps1",
+    "params": [
+      { "name": "ui", "alias": null, "type": "switch" }
+    ],
+    "configVars": ["baseDirUi"],
+    "prompts": [
+      { "var": "baseDirUi", "prompt": "UI project folder or full path" }
+    ]
+  },
+  {
+    "id": "tunnel",
+    "label": "Tunnel \u2014 start Cloudflared tunnel (-tunnel)",
+    "snippet": "tunnel.ps1",
+    "params": [
+      { "name": "tunnel", "alias": null, "type": "switch" }
+    ],
+    "prompts": [
+      { "var": "tunnelName", "prompt": "Tunnel name", "settingsKey": "tunnelName" }
+    ]
+  },
+  {
+    "id": "claude",
+    "label": "Claude \u2014 open Claude Code in backend (-claude)",
+    "snippet": "claude.ps1",
+    "params": [
+      { "name": "claude", "alias": null, "type": "switch" }
+    ],
+    "configVars": ["baseDir"]
+  },
+  {
+    "id": "claudeui",
+    "label": "Claude UI \u2014 open Claude Code in frontend (-claudeui)",
+    "snippet": "claudeui.ps1",
+    "params": [
+      { "name": "claudeui", "alias": null, "type": "switch" }
+    ],
+    "configVars": ["baseDirUi"],
+    "prompts": [
+      { "var": "baseDirUi", "prompt": "UI project folder or full path" }
+    ]
+  },
+  {
+    "id": "compile",
+    "label": "Compile \u2014 MSBuild rebuild (-release / -debug)",
+    "snippet": "compile.ps1",
+    "params": [
+      { "name": "release", "alias": null, "type": "switch" },
+      { "name": "debug", "alias": null, "type": "switch" }
+    ],
+    "prompts": [
+      { "var": "projectName", "prompt": "Solution name (e.g. MyProject.sln)" }
+    ]
+  }
+
+]

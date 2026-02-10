@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(powershell -NoProfile -Command:*)",
+      "Bash(powershell -NoProfile -File -:*)",
+      "Bash(pwsh:*)",
+      "Bash(powershell -Command:*)",
+      "Bash(powershell:*)",
+      "Bash(1 <<'INPUT'\nC:\\\\_developing\nnotepad.exe\ntest-tunnel\nINPUT)"
+    ]
+  }
+}
