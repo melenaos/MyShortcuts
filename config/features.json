@@ -36,7 +36,7 @@
     ],
     "configVars": ["baseDirUi"],
     "prompts": [
-      { "var": "baseDirUi", "prompt": "UI project folder or full path" }
+      { "var": "baseDirUi", "prompt": "UI project folder or full path", "isPath": true }
     ]
   },
   {
@@ -68,7 +68,7 @@
     ],
     "configVars": ["baseDirUi"],
     "prompts": [
-      { "var": "baseDirUi", "prompt": "UI project folder or full path" }
+      { "var": "baseDirUi", "prompt": "UI project folder or full path", "isPath": true }
     ]
   },
   {

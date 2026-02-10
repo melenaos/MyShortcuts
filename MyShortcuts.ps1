@@ -583,7 +583,12 @@ function Exec-AddFeature {
                         $needsSettingsLine = $true
                     }
                 } else {
-                    $configLinesToAdd += "`$$($pr.var) = `"$value`""
+                    if ($pr.isPath -and -not [System.IO.Path]::IsPathRooted($value)) {
+                        $configLinesToAdd += "`$$($pr.var) = `"`$(`$settings.devDirectory)\$value`""
+                        $needsSettingsLine = $true
+                    } else {
+                        $configLinesToAdd += "`$$($pr.var) = `"$value`""
+                    }
                 }
                 $promptedVars[$pr.var] = $true
             }
