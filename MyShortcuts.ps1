@@ -84,10 +84,11 @@ function Exec-NewWizard {
     }
 
     # Prompt for config values
-    $baseDir = Read-Host -Prompt "  Project folder or full path (default: .\$projectName\)"
+    $baseDir = Read-Host -Prompt "  Project folder or full path (BasePath: $($s.devDirectory), default: \$projectName\)"
     if ([string]::IsNullOrWhiteSpace($baseDir)) {
         $baseDir = $projectName
     }
+    $baseDir = $baseDir.TrimStart('\')
     $baseDirIsAbsolute = [System.IO.Path]::IsPathRooted($baseDir)
 
     $solutionName = ""
@@ -101,10 +102,11 @@ function Exec-NewWizard {
     $baseDirUi = ""
     $baseDirUiIsAbsolute = $false
     if ($needsBaseDirUi) {
-        $baseDirUi = Read-Host -Prompt "  UI project folder or full path (default: .\$projectName-Ui\)"
+        $baseDirUi = Read-Host -Prompt "  UI project folder or full path (BasePath: $($s.devDirectory), default: \$projectName-Ui\)"
         if ([string]::IsNullOrWhiteSpace($baseDirUi)) {
             $baseDirUi = "$projectName-Ui"
         }
+        $baseDirUi = $baseDirUi.TrimStart('\')
         $baseDirUiIsAbsolute = [System.IO.Path]::IsPathRooted($baseDirUi)
     }
 
@@ -576,13 +578,15 @@ function Exec-AddFeature {
                 if ($existingVars -contains $pr.var -or $promptedVars.ContainsKey($pr.var)) {
                     continue
                 }
-                $value = Read-Host -Prompt "  $($pr.prompt)"
+                $promptText = if ($pr.isPath) { "$($pr.prompt) (BasePath: $($s.devDirectory))" } else { $pr.prompt }
+                $value = Read-Host -Prompt "  $promptText"
                 if ([string]::IsNullOrWhiteSpace($value)) {
                     if ($pr.settingsKey) {
                         $configLinesToAdd += "`$$($pr.var) = `$settings.$($pr.settingsKey)"
                         $needsSettingsLine = $true
                     }
                 } else {
+                    if ($pr.isPath) { $value = $value.TrimStart('\') }
                     if ($pr.isPath -and -not [System.IO.Path]::IsPathRooted($value)) {
                         $configLinesToAdd += "`$$($pr.var) = `"`$(`$settings.devDirectory)\$value`""
                         $needsSettingsLine = $true
