@@ -10,12 +10,12 @@ MyProject -claude     # open Claude Code in the project directory
 
 ## Getting Started
 
-### 1. Clone and unblock
+### 1. Fork and clone
 
-Clone the repo to a permanent location — this folder becomes your shortcuts hub. The shortcut scripts you create will live here alongside MyShortcuts itself.
+[Fork this repo](https://github.com/melenaos/MyShortcuts/fork), then clone your fork to a permanent location. This folder becomes your shortcuts hub — the scripts you create will live here alongside MyShortcuts.
 
 ```powershell
-git clone https://github.com/nicenemo/MyShortcuts.git
+git clone https://github.com/<your-username>/MyShortcuts.git
 cd MyShortcuts
 Get-ChildItem -Path .\ -Recurse -Filter *.ps1 | Unblock-File
 ```
@@ -45,9 +45,7 @@ The interactive wizard walks you through:
 3. Answer a few config prompts (project folder, solution name)
 4. Optionally add custom commands and a group trigger like `-all`
 
-This creates a `.ps1` file in the MyShortcuts folder that you can run by name from any terminal.
-
-> Your generated shortcut scripts are personal to your setup. Consider adding them to a private fork or your own repo, or simply add them to `.gitignore` if you want to keep pulling updates from this repo.
+This creates a `.ps1` file in the MyShortcuts folder that you can run by name from any terminal. Commit and push your shortcuts to your fork to keep them backed up.
 
 ## Usage
 
@@ -86,6 +84,17 @@ Select a shortcut, then choose an action:
 - **Add predefined feature** — pick from the features above and inject them into the script
 - **Add custom command** — add a new switch with a placeholder block, then fill it in
 - **Open in editor** — open the script directly
+
+## Staying Up to Date
+
+Pull new features and snippets from the upstream repo into your fork:
+
+```powershell
+git remote add upstream https://github.com/melenaos/MyShortcuts.git
+git pull upstream main
+```
+
+This merges cleanly because upstream updates the framework files (`MyShortcuts.ps1`, `lib/`, `templates/`, `config/`) while your fork only adds shortcut scripts. `settings.json` is gitignored so it stays local and won't conflict.
 
 ## Requirements
 
