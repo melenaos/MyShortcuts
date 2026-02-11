@@ -133,11 +133,13 @@ function Exec-NewWizard {
         $cmdName = Read-Host -Prompt "    Switch name (e.g. deploy)"
         $cmdAlias = Read-Host -Prompt "    Alias (leave empty to skip)"
         $cmdDesc = Read-Host -Prompt "    Description (e.g. Deploy to production)"
+        $cmdType = Read-Host -Prompt "    Accept a value? (leave empty for switch, or enter type: string, int)"
         if (-not [string]::IsNullOrWhiteSpace($cmdName)) {
             $customCommands += @{
                 name = $cmdName
                 alias = if ([string]::IsNullOrWhiteSpace($cmdAlias)) { $null } else { $cmdAlias }
                 description = $cmdDesc
+                type = if ([string]::IsNullOrWhiteSpace($cmdType)) { $null } else { $cmdType.Trim().ToLower() }
             }
         }
         $addCustom = Read-Host -Prompt "  Add another custom command? (y/n)"
@@ -210,7 +212,13 @@ function Exec-NewWizard {
         if ($cmd.alias) {
             $paramLines += "    [Alias('$($cmd.alias)')]"
         }
-        $paramLines += "    [switch]`$$($cmd.name) = `$false,"
+        if ($cmd.type -eq 'string') {
+            $paramLines += "    [string]`$$($cmd.name) = `"`","
+        } elseif ($cmd.type -eq 'int') {
+            $paramLines += "    [int]`$$($cmd.name) = 0,"
+        } else {
+            $paramLines += "    [switch]`$$($cmd.name) = `$false,"
+        }
     }
 
     # Remove trailing comma from last param line
@@ -289,7 +297,8 @@ function Exec-NewWizard {
     foreach ($cmd in $customCommands) {
         $aliasPart = if ($cmd.alias) { "-$($cmd.alias),  " } else { "      " }
         $desc = if ($cmd.description) { $cmd.description } else { $cmd.name }
-        $script += "    Write-Host `"  $aliasPart-$($cmd.name)`" -ForegroundColor Cyan -NoNewline" + "`r`n"
+        $valuePart = if ($cmd.type) { " <value>" } else { "" }
+        $script += "    Write-Host `"  $aliasPart-$($cmd.name)$valuePart`" -ForegroundColor Cyan -NoNewline" + "`r`n"
         $script += "    Write-Host `"  $desc`"" + "`r`n"
     }
 
@@ -328,6 +337,9 @@ function Exec-NewWizard {
         $script += "if(`$$($cmd.name)){" + "`r`n"
         $script += "    pushd" + "`r`n"
         $script += "    cd `"`$baseDir`"" + "`r`n"
+        if ($cmd.type) {
+            $script += "    # Value passed: `$$($cmd.name)" + "`r`n"
+        }
         $script += "    # TODO: Add your command here" + "`r`n"
         $script += "    popd" + "`r`n"
         $script += "}" + "`r`n"
@@ -454,8 +466,8 @@ function Get-ExistingParams {
     param([string[]]$lines)
     $params = @()
     foreach ($line in $lines) {
-        if ($line -match '\[switch\]\$(\w+)') {
-            $params += $Matches[1]
+        if ($line -match '\[(switch|string|int)\]\$(\w+)') {
+            $params += $Matches[2]
         }
     }
     return $params
@@ -695,7 +707,7 @@ function Exec-AddFeature {
     # 5. Params before # [/params] — add comma to existing last param
     if ($newParamLines.Count -gt 0) {
         $lastParamIdx = $markers.params - 1
-        if ($lastParamIdx -ge 0 -and $lines[$lastParamIdx] -match '\[switch\]') {
+        if ($lastParamIdx -ge 0 -and $lines[$lastParamIdx] -match '\[(switch|string|int)\]') {
             $lines[$lastParamIdx] = $lines[$lastParamIdx].TrimEnd() + ","
         }
         Insert-Lines -lines $lines -index $markers.params -newLines $newParamLines
@@ -728,18 +740,27 @@ function Exec-AddCustomCommand {
     $cmdAlias = Read-Host -Prompt "  Alias (leave empty to skip)"
     $cmdDesc = Read-Host -Prompt "  Description"
     if ([string]::IsNullOrWhiteSpace($cmdDesc)) { $cmdDesc = $cmdName }
+    $cmdType = Read-Host -Prompt "  Accept a value? (leave empty for switch, or enter type: string, int)"
+    $cmdType = if ([string]::IsNullOrWhiteSpace($cmdType)) { $null } else { $cmdType.Trim().ToLower() }
 
     # Build param lines
     $newParamLines = @()
     if (-not [string]::IsNullOrWhiteSpace($cmdAlias)) {
         $newParamLines += "    [Alias('$cmdAlias')]"
     }
-    $newParamLines += "    [switch]`$$cmdName = `$false"
+    if ($cmdType -eq 'string') {
+        $newParamLines += "    [string]`$$cmdName = `"`""
+    } elseif ($cmdType -eq 'int') {
+        $newParamLines += "    [int]`$$cmdName = 0"
+    } else {
+        $newParamLines += "    [switch]`$$cmdName = `$false"
+    }
 
     # Build help lines
     $aliasPart = if (-not [string]::IsNullOrWhiteSpace($cmdAlias)) { "-$cmdAlias,  " } else { "      " }
+    $valuePart = if ($cmdType) { " <value>" } else { "" }
     $newHelpLines = @(
-        "    Write-Host `"  $aliasPart-$cmdName`" -ForegroundColor Cyan -NoNewline"
+        "    Write-Host `"  $aliasPart-$cmdName$valuePart`" -ForegroundColor Cyan -NoNewline"
         "    Write-Host `"  $cmdDesc`""
     )
 
@@ -749,6 +770,11 @@ function Exec-AddCustomCommand {
         "if(`$$cmdName){"
         "    pushd"
         "    cd `"`$baseDir`""
+    )
+    if ($cmdType) {
+        $newCommandLines += "    # Value passed: `$$cmdName"
+    }
+    $newCommandLines += @(
         "    # TODO: Add your command here"
         "    popd"
         "}"
@@ -761,7 +787,7 @@ function Exec-AddCustomCommand {
 
     # Add comma to existing last param line
     $lastParamIdx = $markers.params - 1
-    if ($lastParamIdx -ge 0 -and $lines[$lastParamIdx] -match '\[switch\]') {
+    if ($lastParamIdx -ge 0 -and $lines[$lastParamIdx] -match '\[(switch|string|int)\]') {
         $lines[$lastParamIdx] = $lines[$lastParamIdx].TrimEnd() + ","
     }
     Insert-Lines -lines $lines -index $markers.params -newLines $newParamLines
