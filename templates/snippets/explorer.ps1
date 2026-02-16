@@ -1,3 +1,4 @@
-if ($explorer) {
-    Invoke-Item "$baseDir"
+# Open in Explorer — {{label}}
+if (${{switch}}) {
+    Invoke-Item "{{dir}}"
 }

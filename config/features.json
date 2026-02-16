@@ -1,48 +1,70 @@
 [
   {
     "id": "directory",
-    "label": "Directory \u2014 open project folder (-d)",
+    "label": "Directory — open project folder (-d)",
     "snippet": "directory.ps1",
+    "scope": "project",
     "params": [
       { "name": "directory", "alias": "d", "type": "switch" }
     ]
   },
-   {
+  {
     "id": "explorer",
-    "label": "Directory \u2014 open project folder in explorer (-exp)",
+    "label": "Explorer — open project folder in explorer (-exp)",
     "snippet": "explorer.ps1",
+    "scope": "project",
     "params": [
       { "name": "explorer", "alias": "exp", "type": "switch" }
     ]
   },
   {
     "id": "project",
-    "label": "Project \u2014 open solution in Visual Studio (-p)",
+    "label": "Project — open solution in Visual Studio (-p)",
     "snippet": "project.ps1",
+    "scope": "project",
     "params": [
       { "name": "project", "alias": "p", "type": "switch" }
     ],
-    "configVars": ["baseDir"],
     "prompts": [
-      { "var": "projectName", "prompt": "Solution name (e.g. MyProject.sln)" }
+      { "var": "sln", "prompt": "Solution name (e.g. MyProject.sln)", "perProject": true }
     ]
   },
   {
-    "id": "ui",
-    "label": "UI \u2014 open frontend in VS Code (-ui)",
-    "snippet": "ui.ps1",
+    "id": "code",
+    "label": "Code — open project in VS Code (-code)",
+    "snippet": "code.ps1",
+    "scope": "project",
     "params": [
-      { "name": "ui", "alias": null, "type": "switch" }
+      { "name": "code", "alias": null, "type": "switch" }
+    ]
+  },
+  {
+    "id": "claude",
+    "label": "Claude — open Claude Code (-claude)",
+    "snippet": "claude.ps1",
+    "scope": "project",
+    "params": [
+      { "name": "claude", "alias": null, "type": "switch" }
+    ]
+  },
+  {
+    "id": "compile",
+    "label": "Compile — dotnet build (-release / -debug)",
+    "snippet": "compile.ps1",
+    "scope": "project",
+    "params": [
+      { "name": "release", "alias": null, "type": "switch" },
+      { "name": "debug", "alias": null, "type": "switch" }
     ],
-    "configVars": ["baseDirUi"],
     "prompts": [
-      { "var": "baseDirUi", "prompt": "UI project folder or full path", "isPath": true }
+      { "var": "sln", "prompt": "Solution name (e.g. MyProject.sln)", "perProject": true }
     ]
   },
   {
     "id": "tunnel",
-    "label": "Tunnel \u2014 start Cloudflared tunnel (-tunnel)",
+    "label": "Tunnel — start Cloudflared tunnel (-tunnel)",
     "snippet": "tunnel.ps1",
+    "scope": "global",
     "params": [
       { "name": "tunnel", "alias": null, "type": "switch" }
     ],
@@ -51,37 +73,12 @@
     ]
   },
   {
-    "id": "claude",
-    "label": "Claude \u2014 open Claude Code in backend (-claude)",
-    "snippet": "claude.ps1",
+    "id": "azurite",
+    "label": "Azurite — start azure storage emulator locally (-azurite)",
+    "snippet": "azurite.ps1",
+    "scope": "global",
     "params": [
-      { "name": "claude", "alias": null, "type": "switch" }
-    ],
-    "configVars": ["baseDir"]
-  },
-  {
-    "id": "claudeui",
-    "label": "Claude UI \u2014 open Claude Code in frontend (-claudeui)",
-    "snippet": "claudeui.ps1",
-    "params": [
-      { "name": "claudeui", "alias": null, "type": "switch" }
-    ],
-    "configVars": ["baseDirUi"],
-    "prompts": [
-      { "var": "baseDirUi", "prompt": "UI project folder or full path", "isPath": true }
-    ]
-  },
-  {
-    "id": "compile",
-    "label": "Compile \u2014 MSBuild rebuild (-release / -debug)",
-    "snippet": "compile.ps1",
-    "params": [
-      { "name": "release", "alias": null, "type": "switch" },
-      { "name": "debug", "alias": null, "type": "switch" }
-    ],
-    "prompts": [
-      { "var": "projectName", "prompt": "Solution name (e.g. MyProject.sln)" }
+      { "name": "azurite", "alias": null, "type": "switch" }
     ]
   }
-
 ]

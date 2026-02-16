@@ -1,7 +1,7 @@
-# Open Claude Code in backend
-if($claude){
+# Open Claude Code — {{label}}
+if(${{switch}}){
     pushd
-    cd "$baseDir"
+    cd "{{dir}}"
     wt --window 0 -p "Powershell" -d . powershell -noExit "claude";
     popd
 }

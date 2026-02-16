@@ -1,5 +1,5 @@
-# Open directory
-if ($directory) {
-    cd "$baseDir"
+# Open directory — {{label}}
+if (${{switch}}) {
+    cd "{{dir}}"
     dir
 }

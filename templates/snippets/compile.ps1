@@ -1,7 +1,7 @@
-# Compile project
-if($release){
-   dotnet build "$baseDir\$projectName" -c Release
+# Compile — {{label}}
+if(${{switchRelease}}){
+   dotnet build "{{dir}}\{{sln}}" -c Release
 }
-if($debug){
-   dotnet build "$baseDir\$projectName" -c Debug
+if(${{switchDebug}}){
+   dotnet build "{{dir}}\{{sln}}" -c Debug
 }

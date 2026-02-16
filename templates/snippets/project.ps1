@@ -1,4 +1,4 @@
-# Open project in VS
-if($project){
-    Invoke-Item "$baseDir\$projectName"
+# Open solution — {{label}}
+if(${{switch}}){
+    Invoke-Item "{{dir}}\{{sln}}"
 }
