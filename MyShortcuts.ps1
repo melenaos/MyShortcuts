@@ -573,7 +573,7 @@ function Get-Settings {
     }
     # Create default settings file if it doesn't exist
     $defaults = @{
-        devDirectory = Split-Path $PSScriptRoot -Parent
+        devDirectory = ""
         editorPath = "notepad.exe"
     }
     $defaults | ConvertTo-Json | Set-Content -Path $settingsPath -Encoding UTF8
@@ -1426,6 +1426,22 @@ if (-not $hasPathVariable -and -not $init){
 # Get Settings
 $s = Get-Settings
 $editorPath = if ($s.editorPath) { $s.editorPath } else { 'notepad.exe' }
+
+# First-run: prompt for devDirectory if not configured
+if (-not $s.devDirectory -and -not $directory -and -not $list) {
+    Write-Host ""
+    Write-Host "  Base development folder is not configured." -ForegroundColor DarkYellow
+    $devDir = Read-Host -Prompt "  Enter your base development folder (e.g. C:\GitHub)"
+    if (-not [string]::IsNullOrWhiteSpace($devDir)) {
+        $settingsPath = "$PSScriptRoot\settings.json"
+        $settingsHash = @{}
+        $s.PSObject.Properties | ForEach-Object { $settingsHash[$_.Name] = $_.Value }
+        $settingsHash["devDirectory"] = $devDir
+        $settingsHash | ConvertTo-Json | Set-Content -Path $settingsPath -Encoding UTF8
+        $s = Get-Content -Path $settingsPath -Raw | ConvertFrom-Json
+    }
+    Write-Host ""
+}
 
 
 if ($directory){
