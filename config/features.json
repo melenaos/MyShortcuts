@@ -26,7 +26,7 @@
       { "name": "project", "alias": "p", "type": "switch" }
     ],
     "prompts": [
-      { "var": "sln", "prompt": "Solution name (e.g. MyProject.sln)", "perProject": true }
+      { "var": "sln", "prompt": "Solution name", "default": "{{projectName}}.sln" }
     ]
   },
   {
@@ -57,7 +57,7 @@
       { "name": "debug", "alias": null, "type": "switch" }
     ],
     "prompts": [
-      { "var": "sln", "prompt": "Solution name (e.g. MyProject.sln)", "perProject": true }
+      { "var": "sln", "prompt": "Solution name", "default": "{{projectName}}.sln" }
     ]
   },
   {
