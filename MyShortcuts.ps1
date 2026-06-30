@@ -32,9 +32,7 @@ PS> .\MyShortcuts -new
     [Alias('l')]
     [switch]$list = $false,
     [Alias('e')]
-    [switch]$edit = $false,
-    [Alias('i')]
-    [switch]$init = $false
+    [switch]$edit = $false
  )
 
 
@@ -577,58 +575,6 @@ function Check-EnvPath {
     }
     return $false
 }
-
-function Exec-Init {
-    $hasPathVariable = Check-EnvPath
-    if (-not $hasPathVariable){
-        [Environment]::SetEnvironmentVariable("Path", $PSScriptRoot + ";" + $Env:Path, "User")
-    }
-
-    # Prompt for settings
-    $settingsPath = "$PSScriptRoot\settings.json"
-    $s = @{}
-    if (Test-Path -Path $settingsPath -PathType Leaf) {
-        try {
-            $existing = Get-Content -Path $settingsPath -Raw | ConvertFrom-Json
-            $existing.PSObject.Properties | ForEach-Object { $s[$_.Name] = $_.Value }
-        } catch {}
-    }
-
-    Write-Host ""
-    $defaultDevDir = if ($s["devDirectory"]) { $s["devDirectory"] } else { Split-Path $PSScriptRoot -Parent }
-    $devDir = Read-Host -Prompt "  Base development folder (default: $defaultDevDir)"
-    if ([string]::IsNullOrWhiteSpace($devDir)) {
-        $devDir = $defaultDevDir
-    }
-    $s["devDirectory"] = $devDir
-
-    $currentEditor = $s["editorPath"]
-    if ($currentEditor) {
-        $editor = Read-Host -Prompt "  Editor path (current: $currentEditor)"
-    } else {
-        $editor = Read-Host -Prompt "  Editor path (default: notepad.exe)"
-    }
-    if (-not [string]::IsNullOrWhiteSpace($editor)) {
-        $s["editorPath"] = $editor
-    } elseif (-not $s["editorPath"]) {
-        $s["editorPath"] = "notepad.exe"
-    }
-
-    $currentTunnel = $s["tunnelName"]
-    if ($currentTunnel) {
-        $tunnel = Read-Host -Prompt "  Cloudflared tunnel name (current: $currentTunnel)"
-    } else {
-        $tunnel = Read-Host -Prompt "  Cloudflared tunnel name (leave empty to skip)"
-    }
-    if (-not [string]::IsNullOrWhiteSpace($tunnel)) {
-        $s["tunnelName"] = $tunnel
-    }
-
-    $s | ConvertTo-Json | Set-Content -Path $settingsPath -Encoding UTF8
-    Write-Host ""
-    Write-Host "  Settings saved." -ForegroundColor Green
-}
-
 
 function Exec-Directory {
     if($terminal){
@@ -1402,12 +1348,10 @@ function Exec-List{
 # --  Main  --
 # ------------
 
-# Display a message when the Env:Path is lacking the script's path
-$hasPathVariable = Check-EnvPath
-if (-not $hasPathVariable -and -not $init){
-    Write-Host "Warning! The MyShortcuts path is missing from the Env:Variables." -ForegroundColor DarkYellow
-    Write-Host "Run 'MyShortcuts.ps1 -init' do add the path to the variables list."  -ForegroundColor Green
-    Write-Host ""
+# Auto-register MyShortcuts directory in PATH on first run
+if (-not (Check-EnvPath)) {
+    [Environment]::SetEnvironmentVariable("Path", $PSScriptRoot + ";" + $Env:Path, "User")
+    $Env:Path = $PSScriptRoot + ";" + $Env:Path
 }
 
 # Get Settings
@@ -1433,9 +1377,6 @@ if (-not $s.devDirectory -and -not $directory -and -not $list) {
 
 if ($directory){
    Exec-Directory
-}
-elseif ($init){
-    Exec-Init
 }
 elseif ($edit){
    Exec-Edit
