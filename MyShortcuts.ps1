@@ -91,32 +91,20 @@ function Exec-NewWizard {
     $filename = $projectName
     Write-Host ""
 
-    # --- Step 2: Define directories ---
-    $directories = @()
-    $dirIndex = 0
-    do {
-        $dirName = Read-Host -Prompt "  Directory name (e.g. backend)"
-        if ([string]::IsNullOrWhiteSpace($dirName)) {
-            if ($directories.Count -eq 0) {
-                Write-Host "  At least one directory is required." -ForegroundColor DarkYellow
-                continue
-            }
-            break
-        }
-        $dirPath = Read-Host -Prompt "  Project folder or full path (BasePath: $($s.devDirectory), default: \$projectName\)"
-        if ([string]::IsNullOrWhiteSpace($dirPath)) {
-            $dirPath = if ($dirIndex -eq 0) { $projectName } else { "$projectName-$($dirName.Substring(0,1).ToUpper() + $dirName.Substring(1))" }
-        }
-        $dirPath = $dirPath.TrimStart('\')
-        $isAbsolute = [System.IO.Path]::IsPathRooted($dirPath)
-        $directories += @{
-            name = $dirName
-            path = $dirPath
-            isAbsolute = $isAbsolute
-        }
-        $dirIndex++
-        $addMore = Read-Host -Prompt "  Add another directory? (y/n)"
-    } while ($addMore -eq 'y')
+    # --- Step 2: Define directory ---
+    $dirPath = Read-Host -Prompt "  Project folder or full path (BasePath: $($s.devDirectory), default: \$projectName\)"
+    if ([string]::IsNullOrWhiteSpace($dirPath)) {
+        $dirPath = $projectName
+    }
+    $dirPath = $dirPath.TrimStart('\')
+    $isAbsolute = [System.IO.Path]::IsPathRooted($dirPath)
+    $dirName = ($projectName -replace '[^a-zA-Z0-9]', '').ToLower()
+    if ([string]::IsNullOrWhiteSpace($dirName)) { $dirName = "main" }
+    $directories = @(@{
+        name = $dirName
+        path = $dirPath
+        isAbsolute = $isAbsolute
+    })
 
     Write-Host ""
 
@@ -1385,14 +1373,13 @@ function Exec-Edit{
     $selectedIndex = Show-SelectionMenu -Title "Select a shortcut to edit" -Options $options
     $file = $list[$selectedIndex]
 
-    $actions = @("Add project directory", "Add predefined feature", "Add custom command", "Open in editor")
+    $actions = @("Add predefined feature", "Add custom command", "Open in editor")
     $actionIndex = Show-SelectionMenu -Title "What do you want to do?" -Options $actions
 
     switch ($actionIndex) {
-        0 { Exec-AddProject -FilePath $file.FullName }
-        1 { Exec-AddFeature -FilePath $file.FullName }
-        2 { Exec-AddCustomCommand -FilePath $file.FullName }
-        3 { & "$editorPath" "$($file.FullName)" }
+        0 { Exec-AddFeature -FilePath $file.FullName }
+        1 { Exec-AddCustomCommand -FilePath $file.FullName }
+        2 { & "$editorPath" "$($file.FullName)" }
     }
 }
 

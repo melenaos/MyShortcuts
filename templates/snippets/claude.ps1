@@ -2,6 +2,6 @@
 if(${{switch}}){
     pushd
     cd "{{dir}}"
-    wt --window 0 -p "Powershell" -d . powershell -noExit "claude";
+    Clear-Host; claude
     popd
 }
