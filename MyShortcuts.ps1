@@ -345,34 +345,30 @@ function Exec-NewWizard {
         $snippetPath = "$PSScriptRoot\templates\snippets\$($f.snippet)"
         if (-not (Test-Path $snippetPath)) { continue }
 
+        # Every snippet is templated. Project features also get dir/label;
+        # global features have no directory context.
+        $vars = @{ switch = $f.params[0].name }
         if ($f.scope -eq "project") {
-            $vars = @{
-                dir = '$projectDir'
-                switch = $f.params[0].name
-                label = $projectName
-            }
-
-            # Handle vars from prompts (like sln)
-            if ($f.prompts) {
-                foreach ($pr in $f.prompts) {
-                    $vars[$pr.var] = "`$$($pr.var)"
-                }
-            }
-
-            # Extra snippet placeholders declared by the feature (data-driven)
-            if ($f.placeholders) {
-                foreach ($ph in $f.placeholders.PSObject.Properties) {
-                    $vars[$ph.Name] = $ph.Value
-                }
-            }
-
-            $expanded = Expand-Snippet -SnippetPath $snippetPath -Vars $vars
-            $script += $expanded + "`r`n"
-        } else {
-            # Global snippet — no placeholders to expand, just include raw
-            $snippetContent = Get-Content -Path $snippetPath -Raw
-            $script += $snippetContent + "`r`n"
+            $vars["dir"] = '$projectDir'
+            $vars["label"] = $projectName
         }
+
+        # Vars from prompts (like sln, tunnelName)
+        if ($f.prompts) {
+            foreach ($pr in $f.prompts) {
+                $vars[$pr.var] = "`$$($pr.var)"
+            }
+        }
+
+        # Extra snippet placeholders declared by the feature (data-driven)
+        if ($f.placeholders) {
+            foreach ($ph in $f.placeholders.PSObject.Properties) {
+                $vars[$ph.Name] = $ph.Value
+            }
+        }
+
+        $expanded = Expand-Snippet -SnippetPath $snippetPath -Vars $vars
+        $script += $expanded + "`r`n"
     }
 
     # Custom command placeholder blocks
@@ -652,28 +648,24 @@ function Exec-AddFeature {
 
         $snippetPath = "$PSScriptRoot\templates\snippets\$($f.snippet)"
         if (Test-Path $snippetPath) {
+            # Every snippet is templated; project features also get dir/label.
+            $vars = @{ switch = $f.params[0].name }
             if ($f.scope -eq "project") {
-                $vars = @{
-                    dir = $projectDirRef
-                    switch = $f.params[0].name
-                    label = $projectNameGuess
-                }
-                if ($f.prompts) {
-                    foreach ($pr in $f.prompts) {
-                        $vars[$pr.var] = "`$$($pr.var)"
-                    }
-                }
-                if ($f.placeholders) {
-                    foreach ($ph in $f.placeholders.PSObject.Properties) {
-                        $vars[$ph.Name] = $ph.Value
-                    }
-                }
-                $expanded = Expand-Snippet -SnippetPath $snippetPath -Vars $vars
-                $newCommandLines += $expanded.Split("`r`n", [System.StringSplitOptions]::None)
-            } else {
-                $snippetContent = Get-Content -Path $snippetPath
-                $newCommandLines += $snippetContent
+                $vars["dir"] = $projectDirRef
+                $vars["label"] = $projectNameGuess
             }
+            if ($f.prompts) {
+                foreach ($pr in $f.prompts) {
+                    $vars[$pr.var] = "`$$($pr.var)"
+                }
+            }
+            if ($f.placeholders) {
+                foreach ($ph in $f.placeholders.PSObject.Properties) {
+                    $vars[$ph.Name] = $ph.Value
+                }
+            }
+            $expanded = Expand-Snippet -SnippetPath $snippetPath -Vars $vars
+            $newCommandLines += $expanded.Split("`r`n", [System.StringSplitOptions]::None)
             $newCommandLines += ""
         }
     }

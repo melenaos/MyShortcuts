@@ -78,14 +78,15 @@ Not every script has every switch — check the `param()` block at the top of ea
 
 ### Templates
 
-`templates/snippets/` contains individual feature snippets. Project-scoped snippets use `{{placeholders}}`:
-- `{{dir}}` — always `$projectDir`
-- `{{switch}}` — switch variable name (e.g. `directory`)
-- `{{label}}` — project name, used in comments
-- `{{sln}}` — the `$sln` solution variable
-- `{{switchRelease}}` / `{{switchDebug}}` — for compile snippet
+`templates/snippets/` contains individual feature snippets. **Every** snippet is run through `Expand-Snippet` — there is no raw/global path. Available `{{placeholders}}`:
+- `{{switch}}` — switch variable name (e.g. `directory`), always available
+- `{{dir}}` — `$projectDir` (project-scoped features only)
+- `{{label}}` — project name, used in comments (project-scoped features only)
+- `{{sln}}` — the `$sln` solution variable (from the `sln` prompt)
+- `{{tunnelName}}` — the `$tunnelName` variable (from the `tunnelName` prompt)
+- `{{switchRelease}}` / `{{switchDebug}}` — from `compile`'s `placeholders` field
 
-Global snippets (`tunnel.ps1`, `azurite.ps1`) remain as plain `if($switchName){ ... }` blocks.
+Global snippets (`tunnel.ps1`, `azurite.ps1`) are templated the same way; they simply receive only `{{switch}}` (plus any prompt vars) and no `{{dir}}`/`{{label}}` since they have no directory context.
 
 ### Helper Functions
 
@@ -118,4 +119,4 @@ The generated script layout also uses two config section delimiters that the inj
 - Use `pushd`/`popd` when temporarily changing directories within a switch block.
 - Use `wt --window 0` to spawn new Windows Terminal tabs for long-running processes (tunnels, claude).
 - Keep `$projectDir` as the first configuration variable after the settings line.
-- New snippets in `templates/snippets/` should use `{{placeholders}}` for project-scoped features (`{{dir}}`, `{{switch}}`, `{{label}}`).
+- New snippets in `templates/snippets/` should guard on `{{switch}}` and use `{{dir}}`/`{{label}}` for project-scoped features. Global snippets use `{{switch}}` (and any prompt vars) only.
