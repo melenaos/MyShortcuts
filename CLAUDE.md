@@ -18,7 +18,7 @@ Get-ChildItem -Path .\ -Recurse -Filter *.ps1 | Unblock-File
 ### MyShortcuts.ps1 — The Manager
 
 Manages the shortcut collection itself. Key capabilities:
-- `-new` launches an interactive wizard to create a new shortcut script from feature snippets in `templates/snippets/`.
+- `-new` launches an interactive wizard to create a new shortcut script from feature snippets in `templates/snippets/`. The wizard first asks for a **project type** (from `config/projectTypes.json`), which pre-checks a set of features in the checklist; the user can then freely toggle any feature. At the end it optionally offers to save the current selection as a new project type.
 - `-edit` opens an action menu for an existing shortcut: **Add predefined feature**, **Add custom command**, or **Open in editor**.
 - `-list` lists all available `.ps1`/`.bat` shortcuts.
 - `-directory` / `-d` opens the MyShortcuts folder (in Explorer or terminal with `-t`).
@@ -31,12 +31,18 @@ Manages the shortcut collection itself. Key capabilities:
 - `editorPath` — editor to open scripts with (defaults to `notepad.exe`)
 - `tunnelName` — default Cloudflared tunnel name (optional)
 
-`config/features.json` defines the predefined feature registry: each feature has an `id`, display `label`, `snippet` filename, `scope` (`"project"` or `"global"`), `params` array (switch name, alias, type), and optional `prompts` array for config variable requirements.
+`config/features.json` defines the predefined feature registry — "the big list." Each feature has an `id`, display `label`, `snippet` filename, `scope` (`"project"` or `"global"`), `params` array (switch name, alias, type), and optional `prompts` array for config variable requirements. Two optional fields keep feature-specific behavior in data rather than in the engine:
+- `inGroupByDefault` (bool, default `true`) — whether the feature is pre-checked when building a `-all`/group trigger. `compile` sets this to `false`.
+- `placeholders` (object) — extra `{{name}} -> value` substitutions passed to the snippet beyond the standard `dir`/`switch`/`label`. `compile` uses this for `{{switchRelease}}`/`{{switchDebug}}`.
+
+The engine references **no feature by id** — all feature-specific behavior is declared in these data fields, so new features never require engine changes.
 
 - **project-scoped** features (`directory`, `explorer`, `project`, `code`, `claude`, `compile`) operate on the script's single `$projectDir`.
 - **global** features (`tunnel`, `azurite`) have no directory association.
 
 Prompts may declare a `default` (e.g. `"{{projectName}}.sln"` for `sln`) which is shown as `(Enter = <expanded default>)` and used when the user presses Enter without typing a value. Prompts with `settingsKey` instead pull their default from `settings.json` (e.g. `tunnelName`).
+
+`config/projectTypes.json` defines the project-type registry — a grouping layer over features. Each type has an `id`, display `label`, and a `features` array of feature ids. A type only sets the **initial checkbox state** in the wizard; it locks nothing, and the full feature list is always shown. The `blank` type (empty `features`) exists so the tool never forces a stack. Types are pure editable data; users grow the list by editing this file or by answering "save this selection as a project type" at the end of the wizard (which appends/replaces by `id`). If the file is missing/empty, the wizard skips the type step and falls back to an all-unchecked checklist.
 
 ### lib/InteractiveMenu.ps1
 

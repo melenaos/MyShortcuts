@@ -82,10 +82,26 @@ function Exec-NewWizard {
 
     Write-Host ""
 
-    # --- Step 3: Feature checklist ---
+    # --- Step 3: Project type (pre-selects a set of features; nothing is locked) ---
+    $typesPath = "$PSScriptRoot\config\projectTypes.json"
+    $projectTypes = @()
+    if (Test-Path $typesPath) {
+        $projectTypes = @(Get-Content -Path $typesPath -Raw | ConvertFrom-Json)
+    }
+
+    $typeFeatureIds = @()
+    if ($projectTypes.Count -gt 0) {
+        $typeOptions = @()
+        foreach ($t in $projectTypes) { $typeOptions += $t.label }
+        $typeIndex = Show-SelectionMenu -Title "Select a project type" -Options $typeOptions
+        $typeFeatureIds = @($projectTypes[$typeIndex].features)
+        Write-Host ""
+    }
+
+    # --- Step 4: Feature checklist (pre-checked from the project type, fully editable) ---
     $checklistItems = @()
     foreach ($f in $features) {
-        $checklistItems += @{ label = $f.label; checked = $false }
+        $checklistItems += @{ label = $f.label; checked = ($typeFeatureIds -contains $f.id) }
     }
 
     $selectedIndices = Show-ChecklistMenu -Title "Select features" -Items $checklistItems
@@ -98,7 +114,7 @@ function Exec-NewWizard {
     Write-Host "  Features selected: $($selectedFeatures.Count)" -ForegroundColor Green
     Write-Host ""
 
-    # --- Step 4: Config prompts ---
+    # --- Step 5: Config prompts ---
     $promptVars = @{}  # varName -> @{ value; useSettings; settingsKey }
     $promptedVars = @{}
     $needsSettings = -not $isAbsolute
@@ -136,7 +152,7 @@ function Exec-NewWizard {
         }
     }
 
-    # --- Step 5: Custom commands ---
+    # --- Step 6: Custom commands ---
     $customCommands = @()
     Write-Host ""
     $addCustom = Read-Host -Prompt "  Add a custom command? (y/n)"
@@ -157,7 +173,7 @@ function Exec-NewWizard {
         $addCustom = Read-Host -Prompt "  Add another custom command? (y/n)"
     }
 
-    # --- Step 6: Group trigger (optional) ---
+    # --- Step 7: Group trigger (optional) ---
     Write-Host ""
     $triggerName = Read-Host -Prompt "  Group trigger switch name (leave empty to skip)"
     $triggerFeatures = @()
@@ -166,7 +182,7 @@ function Exec-NewWizard {
         # Show checklist for which features the group trigger activates
         $triggerItems = @()
         foreach ($f in $selectedFeatures) {
-            $defaultTrigger = $f.id -notin @("compile", "pull")
+            $defaultTrigger = ($null -eq $f.inGroupByDefault) -or $f.inGroupByDefault
             $triggerItems += @{ label = $f.label; checked = $defaultTrigger }
         }
 
@@ -189,7 +205,7 @@ function Exec-NewWizard {
         }
     }
 
-    # --- Step 7: Assemble the script ---
+    # --- Step 8: Assemble the script ---
     $script = ""
 
     # Build param block
@@ -343,10 +359,11 @@ function Exec-NewWizard {
                 }
             }
 
-            # Handle compile special case: switchRelease / switchDebug
-            if ($f.id -eq "compile") {
-                $vars["switchRelease"] = "release"
-                $vars["switchDebug"] = "debug"
+            # Extra snippet placeholders declared by the feature (data-driven)
+            if ($f.placeholders) {
+                foreach ($ph in $f.placeholders.PSObject.Properties) {
+                    $vars[$ph.Name] = $ph.Value
+                }
             }
 
             $expanded = Expand-Snippet -SnippetPath $snippetPath -Vars $vars
@@ -381,6 +398,30 @@ function Exec-NewWizard {
 
     Write-Host ""
     Write-Host "  Created: $filepath" -ForegroundColor Green
+
+    # --- Step 9: Optionally save this selection as a reusable project type ---
+    if ($selectedFeatures.Count -gt 0) {
+        Write-Host ""
+        $saveType = Read-Host -Prompt "  Save this selection as a project type? (name, or Enter to skip)"
+        if (-not [string]::IsNullOrWhiteSpace($saveType)) {
+            $typeId = ($saveType.Trim() -replace '\s+', '-').ToLower()
+            $existingTypes = @()
+            if (Test-Path $typesPath) {
+                $existingTypes = @(Get-Content -Path $typesPath -Raw | ConvertFrom-Json)
+            }
+            # Replace an existing type with the same id, then append the new one
+            $existingTypes = @($existingTypes | Where-Object { $_.id -ne $typeId })
+            $existingTypes += [pscustomobject]@{
+                id       = $typeId
+                label    = $saveType.Trim()
+                features = @($selectedFeatures | ForEach-Object { $_.id })
+            }
+            # ConvertTo-Json collapses a single-element array to an object; force an array wrapper
+            ConvertTo-Json @($existingTypes) -Depth 5 | Set-Content -Path $typesPath -Encoding UTF8
+            Write-Host "  Saved project type '$typeId'." -ForegroundColor Green
+        }
+    }
+
     Write-Host ""
 
     # Open in editor
@@ -622,9 +663,10 @@ function Exec-AddFeature {
                         $vars[$pr.var] = "`$$($pr.var)"
                     }
                 }
-                if ($f.id -eq "compile") {
-                    $vars["switchRelease"] = "release"
-                    $vars["switchDebug"] = "debug"
+                if ($f.placeholders) {
+                    foreach ($ph in $f.placeholders.PSObject.Properties) {
+                        $vars[$ph.Name] = $ph.Value
+                    }
                 }
                 $expanded = Expand-Snippet -SnippetPath $snippetPath -Vars $vars
                 $newCommandLines += $expanded.Split("`r`n", [System.StringSplitOptions]::None)
@@ -653,7 +695,7 @@ function Exec-AddFeature {
     if ($groupTrigger) {
         $triggerLines = @()
         foreach ($f in $selectedFeatures) {
-            if ($f.id -notin @("compile", "pull")) {
+            if (($null -eq $f.inGroupByDefault) -or $f.inGroupByDefault) {
                 $triggerLines += "    `$$($f.params[0].name) = `$true"
             }
         }

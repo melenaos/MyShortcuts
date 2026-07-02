@@ -1,0 +1,22 @@
+[
+  {
+    "id": "blank",
+    "label": "Blank — start from scratch (no features pre-selected)",
+    "features": []
+  },
+  {
+    "id": "dotnet",
+    "label": ".NET — Visual Studio / dotnet",
+    "features": ["directory", "explorer", "project", "compile", "code", "claude", "tunnel", "azurite"]
+  },
+  {
+    "id": "node",
+    "label": "Node.js — editor-centric",
+    "features": ["directory", "explorer", "code", "claude"]
+  },
+  {
+    "id": "python",
+    "label": "Python — editor-centric",
+    "features": ["directory", "explorer", "code", "claude"]
+  }
+]

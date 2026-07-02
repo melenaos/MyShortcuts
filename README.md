@@ -43,11 +43,17 @@ MyShortcuts -new
 The interactive wizard walks you through:
 1. Name your project
 2. Define the project directory
-3. Pick features from a checklist (open directory, open solution, start tunnel, launch Claude Code, etc.)
-4. Answer config prompts (e.g. solution name — press Enter to accept the suggested default)
-5. Optionally add custom commands and a group trigger like `-all`
+3. Pick a **project type** (e.g. Blank, .NET, Node.js, Python) — this pre-selects a sensible set of features, but nothing is locked
+4. Pick features from a checklist (open directory, open solution, start tunnel, launch Claude Code, etc.) — the type's features start ticked; add or remove anything you like
+5. Answer config prompts (e.g. solution name — press Enter to accept the suggested default)
+6. Optionally add custom commands and a group trigger like `-all`
+7. Optionally save your feature selection as a **new project type** for next time
 
 This creates a `.ps1` file in the MyShortcuts folder that you can run by name from any terminal. Commit and push your shortcuts to your fork to keep them backed up.
+
+### Project types
+
+Project types are just editable data in `config/projectTypes.json` — a named bundle of feature ids that pre-checks the wizard's feature list. They're suggestions, never constraints: the full feature list is always available and you can toggle anything. A `blank` type (no features pre-selected) ships by default so the tool never forces a stack on you. Add your own types by editing the file, or by answering "save this selection as a project type" at the end of the wizard.
 
 ## Usage
 
