@@ -53,7 +53,9 @@ This creates a `.ps1` file in the MyShortcuts folder that you can run by name fr
 
 ### Project types
 
-Project types are just editable data in `config/projectTypes.json` — a named bundle of feature ids that pre-checks the wizard's feature list. They're suggestions, never constraints: the full feature list is always available and you can toggle anything. A `blank` type (no features pre-selected) ships by default so the tool never forces a stack on you. Add your own types by editing the file, or by answering "save this selection as a project type" at the end of the wizard.
+Project types are a named bundle of feature ids that pre-checks the wizard's feature list. They're suggestions, never constraints: the full feature list is always available and you can toggle anything. A `blank` type (no features pre-selected) ships by default so the tool never forces a stack on you.
+
+Built-in types live in `config/projectTypes.json`; anything you save (via "save this selection as a project type" at the end of the wizard) goes into `config/projectTypes.local.json` instead. This split exists so `MyShortcuts -update` can safely refresh the built-in list without wiping out your own saved types.
 
 ## Usage
 

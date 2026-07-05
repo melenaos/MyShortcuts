@@ -51,6 +51,27 @@ function Expand-Snippet {
     return $content
 }
 
+function Get-MergedProjectTypes {
+    param([string]$BuiltinPath, [string]$LocalPath)
+
+    $builtinTypes = @()
+    if (Test-Path $BuiltinPath) {
+        $builtinTypes = @(Get-Content -Path $BuiltinPath -Raw | ConvertFrom-Json)
+    }
+
+    $localTypes = @()
+    if (Test-Path $LocalPath) {
+        $localTypes = @(Get-Content -Path $LocalPath -Raw | ConvertFrom-Json)
+    }
+
+    # A local type with the same id as a built-in shadows it, so users can
+    # customize a shipped type without editing the engine-owned file.
+    $localIds = @($localTypes | ForEach-Object { $_.id })
+    $merged = @($builtinTypes | Where-Object { $localIds -notcontains $_.id })
+    $merged += $localTypes
+    return $merged
+}
+
 function Get-ProjectDirRef {
     param([string[]]$lines)
     foreach ($line in $lines) {
@@ -87,11 +108,11 @@ function Exec-NewWizard {
     Write-Host ""
 
     # --- Step 3: Project type (pre-selects a set of features; nothing is locked) ---
-    $typesPath = "$PSScriptRoot\config\projectTypes.json"
-    $projectTypes = @()
-    if (Test-Path $typesPath) {
-        $projectTypes = @(Get-Content -Path $typesPath -Raw | ConvertFrom-Json)
-    }
+    # Built-in types ship with the engine and are overwritten by -update.
+    # Local types are the user's own saved selections and are never touched by -update.
+    $builtinTypesPath = "$PSScriptRoot\config\projectTypes.json"
+    $localTypesPath = "$PSScriptRoot\config\projectTypes.local.json"
+    $projectTypes = Get-MergedProjectTypes -BuiltinPath $builtinTypesPath -LocalPath $localTypesPath
 
     $typeFeatureIds = @()
     if ($projectTypes.Count -gt 0) {
@@ -405,19 +426,21 @@ function Exec-NewWizard {
         $saveType = Read-Host -Prompt "  Save this selection as a project type? (name, or Enter to skip)"
         if (-not [string]::IsNullOrWhiteSpace($saveType)) {
             $typeId = ($saveType.Trim() -replace '\s+', '-').ToLower()
-            $existingTypes = @()
-            if (Test-Path $typesPath) {
-                $existingTypes = @(Get-Content -Path $typesPath -Raw | ConvertFrom-Json)
+            $existingLocalTypes = @()
+            if (Test-Path $localTypesPath) {
+                $existingLocalTypes = @(Get-Content -Path $localTypesPath -Raw | ConvertFrom-Json)
             }
-            # Replace an existing type with the same id, then append the new one
-            $existingTypes = @($existingTypes | Where-Object { $_.id -ne $typeId })
-            $existingTypes += [pscustomobject]@{
+            # Replace an existing local type with the same id, then append the new one.
+            # Saved types always go to the local file, never config/projectTypes.json,
+            # so a future -update can't wipe them out.
+            $existingLocalTypes = @($existingLocalTypes | Where-Object { $_.id -ne $typeId })
+            $existingLocalTypes += [pscustomobject]@{
                 id       = $typeId
                 label    = $saveType.Trim()
                 features = @($selectedFeatures | ForEach-Object { $_.id })
             }
             # ConvertTo-Json collapses a single-element array to an object; force an array wrapper
-            ConvertTo-Json @($existingTypes) -Depth 5 | Set-Content -Path $typesPath -Encoding UTF8
+            ConvertTo-Json @($existingLocalTypes) -Depth 5 | Set-Content -Path $localTypesPath -Encoding UTF8
             Write-Host "  Saved project type '$typeId'." -ForegroundColor Green
         }
     }

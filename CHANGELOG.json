@@ -10,5 +10,11 @@
     "notes": [
       "Fixed -update writing files with a UTF-8 BOM (Set-Content -Encoding UTF8 adds one on Windows PowerShell), which corrupted synced files with a stray character and noisy diffs."
     ]
+  },
+  {
+    "version": "1.0.2",
+    "notes": [
+      "Split project types into config/projectTypes.json (built-in, synced by -update) and config/projectTypes.local.json (your saved types, never touched by -update). Previously -update would have overwritten any custom project type you saved."
+    ]
   }
 ]

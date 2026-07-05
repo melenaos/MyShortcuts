@@ -33,7 +33,7 @@ The repo root has a `VERSION` file (plain semver string, e.g. `1.0.0`) bumped wh
 - `VERSION`, `CHANGELOG.json`, `MyShortcuts.ps1`, `lib/InteractiveMenu.ps1`, `config/features.json`, `config/projectTypes.json`, `CLAUDE.md`, `README.md` — hardcoded list in `Get-EngineFileList`
 - `templates/snippets/*` — discovered dynamically via the GitHub Contents API so new snippets get pulled without an engine change
 
-This is a plain overwrite-sync, not a migration system: there's no per-version transform step, so it only works because engine changes so far have been additive/compatible. It never touches `settings.json`, `.claude/`, or any per-project shortcut script — those are the only files that distinguish a downstream clone (like a forked or copied shortcuts repo) from this repo. `$UpdateRepoOwner`/`$UpdateRepoName`/`$UpdateBranch` at the top of the Update region point at `melenaos/MyShortcuts`/`main`; a fork that wants to self-update from its own fork instead of upstream would need to change those.
+This is a plain overwrite-sync, not a migration system: there's no per-version transform step, so it only works because engine changes so far have been additive/compatible. It never touches `settings.json`, `.claude/`, any per-project shortcut script, or `config/projectTypes.local.json` — those are the files that distinguish a downstream clone (like a forked or copied shortcuts repo) from this repo, and the ones a user actually customizes. `$UpdateRepoOwner`/`$UpdateRepoName`/`$UpdateBranch` at the top of the Update region point at `melenaos/MyShortcuts`/`main`; a fork that wants to self-update from its own fork instead of upstream would need to change those.
 
 ### Configuration
 
@@ -53,7 +53,9 @@ The engine references **no feature by id** — all feature-specific behavior is 
 
 Prompts may declare a `default` (e.g. `"{{projectName}}.sln"` for `sln`) which is shown as `(Enter = <expanded default>)` and used when the user presses Enter without typing a value. Prompts with `settingsKey` instead pull their default from `settings.json` (e.g. `tunnelName`).
 
-`config/projectTypes.json` defines the project-type registry — a grouping layer over features. Each type has an `id`, display `label`, and a `features` array of feature ids. A type only sets the **initial checkbox state** in the wizard; it locks nothing, and the full feature list is always shown. The `blank` type (empty `features`) exists so the tool never forces a stack. Types are pure editable data; users grow the list by editing this file or by answering "save this selection as a project type" at the end of the wizard (which appends/replaces by `id`). If the file is missing/empty, the wizard skips the type step and falls back to an all-unchecked checklist.
+`config/projectTypes.json` defines the project-type registry — a grouping layer over features. Each type has an `id`, display `label`, and a `features` array of feature ids. A type only sets the **initial checkbox state** in the wizard; it locks nothing, and the full feature list is always shown. The `blank` type (empty `features`) exists so the tool never forces a stack. If both type files are missing/empty, the wizard skips the type step and falls back to an all-unchecked checklist.
+
+`config/projectTypes.json` is **engine-owned** — it ships with the tool and is overwritten by `-update`. User-saved types instead live in `config/projectTypes.local.json`, a sibling file that `-update` never touches (it's not in `Get-EngineFileList`'s whitelist). `Get-MergedProjectTypes` reads both and merges them for the wizard's type-selection step, with a local type shadowing a built-in of the same `id` — so users can customize a shipped type without editing the engine file it'd otherwise be overwritten with. Answering "save this selection as a project type" at the end of the wizard always appends/replaces by `id` into `projectTypes.local.json`, never into `projectTypes.json`.
 
 ### lib/InteractiveMenu.ps1
 
