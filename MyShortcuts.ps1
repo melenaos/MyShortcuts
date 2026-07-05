@@ -98,7 +98,24 @@ function Exec-NewWizard {
     Write-Host ""
 
     # --- Step 2: Define directory ---
-    $dirPath = Read-Host -Prompt "  Project folder or full path (BasePath: $($s.devDirectory), default: \$projectName\)"
+    $existingFolders = @()
+    if ($s.devDirectory -and (Test-Path -Path $s.devDirectory -PathType Container)) {
+        $existingFolders = @(Get-ChildItem -Path $s.devDirectory -Directory | Select-Object -ExpandProperty Name | Sort-Object)
+    }
+
+    if ($existingFolders.Count -gt 0) {
+        $folderOptions = @($existingFolders) + "Enter custom path..."
+        $folderIndex = Show-SelectionMenu -Title "Select project folder (BasePath: $($s.devDirectory))" -Options $folderOptions
+        if ($folderIndex -eq $folderOptions.Count - 1) {
+            $dirPath = Read-Host -Prompt "  Project folder or full path (BasePath: $($s.devDirectory), default: \$projectName\)"
+        } else {
+            $dirPath = $existingFolders[$folderIndex]
+        }
+        Write-Host ""
+    } else {
+        $dirPath = Read-Host -Prompt "  Project folder or full path (BasePath: $($s.devDirectory), default: \$projectName\)"
+    }
+
     if ([string]::IsNullOrWhiteSpace($dirPath)) {
         $dirPath = $projectName
     }

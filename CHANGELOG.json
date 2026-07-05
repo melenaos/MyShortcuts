@@ -22,5 +22,11 @@
     "notes": [
       "Fixed -update's release-notes step throwing on Windows PowerShell 5.1: wrapping ConvertFrom-Json's array output in @() could collapse a multi-entry CHANGELOG.json into a single flattened item. Now fetches the raw text and parses it directly."
     ]
+  },
+  {
+    "version": "1.0.4",
+    "notes": [
+      "The -new wizard's project folder step now shows a selection menu of the subfolders under devDirectory, with an 'Enter custom path...' option to fall back to free text."
+    ]
   }
 ]
