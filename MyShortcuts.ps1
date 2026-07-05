@@ -523,13 +523,18 @@ function Exec-Update {
 
     # Show release notes for every version between local (exclusive) and remote (inclusive)
     try {
-        $changelog = @(Invoke-RestMethod -Uri "$rawBase/CHANGELOG.json" -UseBasicParsing -Headers @{ "User-Agent" = "MyShortcuts-Update" })
+        # Fetch as raw text and parse explicitly. On Windows PowerShell 5.1, wrapping
+        # ConvertFrom-Json's array output in @() can collapse a multi-element array of
+        # objects (each with a nested array property) down to a single flattened item.
+        $changelogRaw = (Invoke-WebRequest -Uri "$rawBase/CHANGELOG.json" -UseBasicParsing).Content
+        $changelog = $changelogRaw | ConvertFrom-Json
         $localV = [version]$localVersion
         $remoteV = [version]$remoteVersion
-        $relevant = @($changelog | Where-Object {
+        $relevant = $changelog | Where-Object {
             $entryV = [version]$_.version
             $entryV -gt $localV -and $entryV -le $remoteV
-        } | Sort-Object { [version]$_.version })
+        } | Sort-Object { [version]$_.version }
+        $relevant = @($relevant)
 
         if ($relevant.Count -gt 0) {
             Write-Host "  What's new:" -ForegroundColor Cyan
