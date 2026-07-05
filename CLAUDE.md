@@ -22,7 +22,18 @@ Manages the shortcut collection itself. Key capabilities:
 - `-edit` opens an action menu for an existing shortcut: **Add predefined feature**, **Add custom command**, or **Open in editor**.
 - `-list` lists all available `.ps1`/`.bat` shortcuts.
 - `-directory` / `-d` opens the MyShortcuts folder (in Explorer or terminal with `-t`).
+- `-update` checks the `VERSION` file on GitHub against the local one and, if newer, re-downloads the engine files in place (see **Self-update** below).
 - The MyShortcuts directory is auto-registered in the user's `PATH` on first run, and the user is prompted for `devDirectory` on first run if it isn't configured yet.
+
+### Self-update
+
+The repo root has a `VERSION` file (plain semver string, e.g. `1.0.0`) bumped whenever engine files change, and a `CHANGELOG.json` (array of `{ version, notes: [...] }`, ascending order) with **one entry per version bump** describing what changed. Every commit that changes an engine-owned file must bump `VERSION` and append a matching `CHANGELOG.json` entry — `-update` has nothing to show otherwise.
+
+`-update` (`Exec-Update` in `MyShortcuts.ps1`) compares the local `VERSION` against `https://raw.githubusercontent.com/melenaos/MyShortcuts/main/VERSION`. If they differ, it fetches the remote `CHANGELOG.json` and prints every entry with `localVersion < version <= remoteVersion` (so hopping multiple versions in one update shows the full cumulative note list, not just the latest), then asks for confirmation before touching any file. Only on explicit `y` does it re-download and overwrite a fixed whitelist of engine-owned files:
+- `VERSION`, `CHANGELOG.json`, `MyShortcuts.ps1`, `lib/InteractiveMenu.ps1`, `config/features.json`, `config/projectTypes.json`, `CLAUDE.md`, `README.md` — hardcoded list in `Get-EngineFileList`
+- `templates/snippets/*` — discovered dynamically via the GitHub Contents API so new snippets get pulled without an engine change
+
+This is a plain overwrite-sync, not a migration system: there's no per-version transform step, so it only works because engine changes so far have been additive/compatible. It never touches `settings.json`, `.claude/`, or any per-project shortcut script — those are the only files that distinguish a downstream clone (like a forked or copied shortcuts repo) from this repo. `$UpdateRepoOwner`/`$UpdateRepoName`/`$UpdateBranch` at the top of the Update region point at `melenaos/MyShortcuts`/`main`; a fork that wants to self-update from its own fork instead of upstream would need to change those.
 
 ### Configuration
 

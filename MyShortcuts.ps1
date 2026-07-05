@@ -14,6 +14,9 @@ Uses the terminal as output
 .PARAMETER list
 Displays all the available shortcuts
 
+.PARAMETER update
+Checks GitHub for a newer engine version and, if found, downloads and overwrites the engine files (MyShortcuts.ps1, lib/, templates/, config/, VERSION) in place. Your own shortcut scripts and settings.json are never touched.
+
 .EXAMPLE
 PS> .\MyShortcuts -d
 
@@ -32,7 +35,8 @@ PS> .\MyShortcuts -new
     [Alias('l')]
     [switch]$list = $false,
     [Alias('e')]
-    [switch]$edit = $false
+    [switch]$edit = $false,
+    [switch]$update = $false
  )
 
 
@@ -422,6 +426,131 @@ function Exec-NewWizard {
 
     # Open in editor
     & "$editorPath" "$filepath"
+}
+
+# ==================== Update ==================== #
+
+$UpdateRepoOwner = "melenaos"
+$UpdateRepoName = "MyShortcuts"
+$UpdateBranch = "main"
+
+function Get-LocalVersion {
+    $versionPath = "$PSScriptRoot\VERSION"
+    if (Test-Path -Path $versionPath -PathType Leaf) {
+        return (Get-Content -Path $versionPath -Raw).Trim()
+    }
+    return "0.0.0"
+}
+
+function Get-EngineFileList {
+    param([string]$RawBase)
+
+    # Fixed engine-owned files, always synced
+    $files = @(
+        "VERSION",
+        "CHANGELOG.json",
+        "MyShortcuts.ps1",
+        "lib/InteractiveMenu.ps1",
+        "config/features.json",
+        "config/projectTypes.json",
+        "CLAUDE.md",
+        "README.md"
+    )
+
+    # Snippet files are discovered dynamically so new snippets get pulled automatically
+    try {
+        $apiUri = "https://api.github.com/repos/$UpdateRepoOwner/$UpdateRepoName/contents/templates/snippets?ref=$UpdateBranch"
+        $snippetEntries = Invoke-RestMethod -Uri $apiUri -UseBasicParsing -Headers @{ "User-Agent" = "MyShortcuts-Update" }
+        foreach ($entry in $snippetEntries) {
+            if ($entry.type -eq "file") {
+                $files += "templates/snippets/$($entry.name)"
+            }
+        }
+    } catch {
+        Write-Host "  Warning: could not list templates/snippets from GitHub; skipping snippet sync." -ForegroundColor DarkYellow
+    }
+
+    return $files
+}
+
+function Exec-Update {
+    $rawBase = "https://raw.githubusercontent.com/$UpdateRepoOwner/$UpdateRepoName/$UpdateBranch"
+
+    Write-Host ""
+    Write-Host "  Checking for updates..." -ForegroundColor Cyan
+
+    try {
+        $remoteVersion = (Invoke-WebRequest -Uri "$rawBase/VERSION" -UseBasicParsing).Content.Trim()
+    } catch {
+        Write-Host "  Could not reach GitHub. Check your internet connection." -ForegroundColor Red
+        Write-Host ""
+        return
+    }
+
+    $localVersion = Get-LocalVersion
+
+    if ($remoteVersion -eq $localVersion) {
+        Write-Host "  Already up to date (v$localVersion)." -ForegroundColor Green
+        Write-Host ""
+        return
+    }
+
+    Write-Host "  Update available: v$localVersion -> v$remoteVersion" -ForegroundColor Yellow
+    Write-Host ""
+
+    # Show release notes for every version between local (exclusive) and remote (inclusive)
+    try {
+        $changelog = @(Invoke-RestMethod -Uri "$rawBase/CHANGELOG.json" -UseBasicParsing -Headers @{ "User-Agent" = "MyShortcuts-Update" })
+        $localV = [version]$localVersion
+        $remoteV = [version]$remoteVersion
+        $relevant = @($changelog | Where-Object {
+            $entryV = [version]$_.version
+            $entryV -gt $localV -and $entryV -le $remoteV
+        } | Sort-Object { [version]$_.version })
+
+        if ($relevant.Count -gt 0) {
+            Write-Host "  What's new:" -ForegroundColor Cyan
+            foreach ($entry in $relevant) {
+                Write-Host "    v$($entry.version)" -ForegroundColor Cyan
+                foreach ($note in $entry.notes) {
+                    Write-Host "      - $note"
+                }
+            }
+            Write-Host ""
+        }
+    } catch {
+        Write-Host "  (Could not load release notes.)" -ForegroundColor DarkYellow
+        Write-Host ""
+    }
+
+    $confirm = Read-Host -Prompt "  Download and overwrite engine files? (y/n)"
+    if ($confirm -ne 'y') {
+        Write-Host "  Cancelled." -ForegroundColor DarkYellow
+        Write-Host ""
+        return
+    }
+
+    $files = Get-EngineFileList -RawBase $rawBase
+
+    foreach ($relPath in $files) {
+        $localPath = Join-Path $PSScriptRoot $relPath
+        $localDir = Split-Path $localPath -Parent
+        if ($localDir -and -not (Test-Path $localDir)) {
+            New-Item -ItemType Directory -Path $localDir -Force | Out-Null
+        }
+        try {
+            $content = (Invoke-WebRequest -Uri "$rawBase/$relPath" -UseBasicParsing).Content
+            Set-Content -Path $localPath -Value $content -Encoding UTF8
+            Write-Host "  Updated: $relPath" -ForegroundColor DarkGray
+        } catch {
+            Write-Host "  Failed to update: $relPath" -ForegroundColor Red
+        }
+    }
+
+    Write-Host ""
+    Write-Host "  Updated to v$remoteVersion." -ForegroundColor Green
+    Write-Host "  Review changes with 'git diff' before committing." -ForegroundColor DarkGray
+    Write-Host ""
 }
 
 function Get-Settings {
@@ -894,7 +1023,7 @@ $s = Get-Settings
 $editorPath = if ($s.editorPath) { $s.editorPath } else { 'notepad.exe' }
 
 # First-run: prompt for devDirectory if not configured
-if (-not $s.devDirectory -and -not $directory -and -not $list) {
+if (-not $s.devDirectory -and -not $directory -and -not $list -and -not $update) {
     Write-Host ""
     Write-Host "  Base development folder is not configured." -ForegroundColor DarkYellow
     $devDir = Read-Host -Prompt "  Enter your base development folder (e.g. C:\GitHub)"
@@ -921,6 +1050,9 @@ elseif ($new){
 }
 elseif ($list){
    Exec-List
+}
+elseif ($update){
+   Exec-Update
 }
 else{
     Write-Host "Execute 'Get-Help MyShortcut.ps1 -full' to learn more"

@@ -63,6 +63,7 @@ Project types are just editable data in `config/projectTypes.json` — a named b
 | `MyShortcuts -edit` | Add features or custom commands to an existing shortcut |
 | `MyShortcuts -list` | List all available shortcuts |
 | `MyShortcuts -d` | Open the MyShortcuts folder |
+| `MyShortcuts -update` | Pull the latest engine files from GitHub |
 
 ## Available Features
 
@@ -96,7 +97,15 @@ Select a shortcut, then choose an action:
 
 ## Staying Up to Date
 
-Pull new features and snippets from the upstream repo into your fork:
+The easiest way to pull engine improvements is:
+
+```powershell
+MyShortcuts -update
+```
+
+This checks the `VERSION` file on GitHub against your local one. If it's newer, it prints the release notes for every version in between (from `CHANGELOG.json`) and asks for confirmation before doing anything. Only after you confirm does it re-download the engine files (`MyShortcuts.ps1`, `lib/`, `templates/snippets/`, `config/features.json`, `config/projectTypes.json`, docs) straight from `melenaos/MyShortcuts`. It never touches `settings.json` or any shortcut script you've created, so it works whether your copy is a git fork or a plain copy. Review the changes with `git diff` afterward before committing.
+
+If you did fork the repo, you can instead pull via git:
 
 ```powershell
 git remote add upstream https://github.com/melenaos/MyShortcuts.git

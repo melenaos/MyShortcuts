@@ -1,0 +1,8 @@
+[
+  {
+    "version": "1.0.0",
+    "notes": [
+      "Introduced versioned self-update: added VERSION and CHANGELOG.json, and the -update command."
+    ]
+  }
+]
