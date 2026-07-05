@@ -21,7 +21,7 @@ Manages the shortcut collection itself. Key capabilities:
 - `-new` launches an interactive wizard to create a new shortcut script from feature snippets in `templates/snippets/`. The wizard first asks for a **project type** (from `config/projectTypes.json`), which pre-checks a set of features in the checklist; the user can then freely toggle any feature. At the end it optionally offers to save the current selection as a new project type.
 - `-edit` opens an action menu for an existing shortcut: **Add predefined feature**, **Add custom command**, or **Open in editor**.
 - `-list` lists all available `.ps1`/`.bat` shortcuts.
-- `-directory` / `-d` opens the MyShortcuts folder (in Explorer or terminal with `-t`).
+- `-directory` / `-d` opens the MyShortcuts folder in the terminal and lists it. `-explorer` / `-e` opens the same folder in Windows Explorer instead.
 - `-update` checks the `VERSION` file on GitHub against the local one and, if newer, re-downloads the engine files in place (see **Self-update** below).
 - The MyShortcuts directory is auto-registered in the user's `PATH` on first run, and the user is prompted for `devDirectory` on first run if it isn't configured yet.
 

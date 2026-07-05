@@ -34,5 +34,11 @@
     "notes": [
       "MyShortcuts.ps1's -d now always opens the MyShortcuts folder in the terminal and lists it (the -terminal/-t switch was removed). Added a new -e/-explorer switch to open the folder in Windows Explorer instead. The -edit command's -e alias was removed to free up -e for this."
     ]
+  },
+  {
+    "version": "1.0.6",
+    "notes": [
+      "Updated README.md and CLAUDE.md to document the -d/-e change from 1.0.5 (README's usage table and CLAUDE.md's manager description previously still referenced the removed -t switch)."
+    ]
   }
 ]

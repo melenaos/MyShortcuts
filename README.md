@@ -64,7 +64,8 @@ Built-in types live in `config/projectTypes.json`; anything you save (via "save 
 | `MyShortcuts -new` | Create a new shortcut script |
 | `MyShortcuts -edit` | Add features or custom commands to an existing shortcut |
 | `MyShortcuts -list` | List all available shortcuts |
-| `MyShortcuts -d` | Open the MyShortcuts folder |
+| `MyShortcuts -d` | Open the MyShortcuts folder in the terminal and list it |
+| `MyShortcuts -e` | Open the MyShortcuts folder in Windows Explorer |
 | `MyShortcuts -update` | Pull the latest engine files from GitHub |
 
 ## Available Features
