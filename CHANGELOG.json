@@ -28,5 +28,11 @@
     "notes": [
       "The -new wizard's project folder step now shows a selection menu of the subfolders under devDirectory, with an 'Enter custom path...' option to fall back to free text."
     ]
+  },
+  {
+    "version": "1.0.5",
+    "notes": [
+      "MyShortcuts.ps1's -d now always opens the MyShortcuts folder in the terminal and lists it (the -terminal/-t switch was removed). Added a new -e/-explorer switch to open the folder in Windows Explorer instead. The -edit command's -e alias was removed to free up -e for this."
+    ]
   }
 ]

@@ -6,10 +6,10 @@ Manages scripts for faster access to daily actions
 Launches the interactive wizard to create a new shortcut script.
 
 .PARAMETER directory
-Shows the MyShorcut directory in Windows Explorer. If `-terminal` parameter is supplied it uses the terminal.
+Opens the MyShortcuts directory in the terminal and lists its contents.
 
-.PARAMETER terminal
-Uses the terminal as output
+.PARAMETER explorer
+Opens the MyShortcuts directory in Windows Explorer.
 
 .PARAMETER list
 Displays all the available shortcuts
@@ -30,11 +30,10 @@ PS> .\MyShortcuts -new
     [switch]$new = $false,
     [Alias('d')]
     [switch]$directory = $false,
-    [Alias('t')]
-    [switch]$terminal = $false,
+    [Alias('e')]
+    [switch]$explorer = $false,
     [Alias('l')]
     [switch]$list = $false,
-    [Alias('e')]
     [switch]$edit = $false,
     [switch]$update = $false
  )
@@ -630,12 +629,12 @@ function Check-EnvPath {
 }
 
 function Exec-Directory {
-    if($terminal){
-        cd $PSScriptRoot
-        ls
-    }else{
-        Invoke-Item $PSScriptRoot
-    }
+    cd $PSScriptRoot
+    ls
+}
+
+function Exec-Explorer {
+    Invoke-Item $PSScriptRoot
 }
 
 function Find-MarkerLines {
@@ -1069,7 +1068,7 @@ $s = Get-Settings
 $editorPath = if ($s.editorPath) { $s.editorPath } else { 'notepad.exe' }
 
 # First-run: prompt for devDirectory if not configured
-if (-not $s.devDirectory -and -not $directory -and -not $list -and -not $update) {
+if (-not $s.devDirectory -and -not $directory -and -not $explorer -and -not $list -and -not $update) {
     Write-Host ""
     Write-Host "  Base development folder is not configured." -ForegroundColor DarkYellow
     $devDir = Read-Host -Prompt "  Enter your base development folder (e.g. C:\GitHub)"
@@ -1087,6 +1086,9 @@ if (-not $s.devDirectory -and -not $directory -and -not $list -and -not $update)
 
 if ($directory){
    Exec-Directory
+}
+elseif ($explorer){
+   Exec-Explorer
 }
 elseif ($edit){
    Exec-Edit
