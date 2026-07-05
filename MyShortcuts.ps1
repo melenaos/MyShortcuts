@@ -540,7 +540,8 @@ function Exec-Update {
         }
         try {
             $content = (Invoke-WebRequest -Uri "$rawBase/$relPath" -UseBasicParsing).Content
-            Set-Content -Path $localPath -Value $content -Encoding UTF8
+            # Set-Content -Encoding UTF8 adds a BOM on Windows PowerShell; write raw bytes instead
+            [System.IO.File]::WriteAllText($localPath, $content, (New-Object System.Text.UTF8Encoding($false)))
             Write-Host "  Updated: $relPath" -ForegroundColor DarkGray
         } catch {
             Write-Host "  Failed to update: $relPath" -ForegroundColor Red

@@ -4,5 +4,11 @@
     "notes": [
       "Introduced versioned self-update: added VERSION and CHANGELOG.json, and the -update command."
     ]
+  },
+  {
+    "version": "1.0.1",
+    "notes": [
+      "Fixed -update writing files with a UTF-8 BOM (Set-Content -Encoding UTF8 adds one on Windows PowerShell), which corrupted synced files with a stray character and noisy diffs."
+    ]
   }
 ]
