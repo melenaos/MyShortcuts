@@ -759,6 +759,17 @@ function Exec-AddFeature {
     $projectDirRef = Get-ProjectDirRef -lines $lines
     $projectNameGuess = [System.IO.Path]::GetFileNameWithoutExtension($FilePath)
 
+    # Resolve the script's actual project folder so detect-prompts can scan it.
+    # The engine writes either "$($settings.devDirectory)\<dir>" (relative) or a
+    # literal absolute path, so expand the settings token against loaded settings.
+    $resolvedProjectDir = $null
+    foreach ($line in $lines) {
+        if ($line -match '^\s*\$projectDir\s*=\s*"(.*)"\s*$') {
+            $resolvedProjectDir = $Matches[1].Replace('$($settings.devDirectory)', $s.devDirectory).Replace('$settings.devDirectory', $s.devDirectory)
+            break
+        }
+    }
+
     $availableFeatures = @()
     foreach ($f in $features) {
         if ($f.scope -eq "project" -and -not $projectDirRef) { continue }
@@ -832,6 +843,24 @@ function Exec-AddFeature {
                 $value = Read-Host -Prompt "  $($pr.prompt) (Enter = $defaultVal)"
                 if ([string]::IsNullOrWhiteSpace($value)) {
                     $value = $defaultVal
+                }
+                $configLinesToAdd += "`$$($pr.var) = `"$value`""
+            } elseif ($pr.detect) {
+                # Scan the script's project folder for a file matching the detect
+                # globs (in order) and propose it; otherwise prompt plainly (the
+                # snippet's run-time detection is the fallback).
+                $detected = $null
+                if ($resolvedProjectDir) {
+                    foreach ($pat in $pr.detect) {
+                        $hit = @(Get-ChildItem -Path $resolvedProjectDir -Filter $pat -File -ErrorAction SilentlyContinue) | Select-Object -First 1
+                        if ($hit) { $detected = $hit.Name; break }
+                    }
+                }
+                if ($detected) {
+                    $value = Read-Host -Prompt "  $($pr.prompt) (Enter = use existing $detected)"
+                    if ([string]::IsNullOrWhiteSpace($value)) { $value = $detected }
+                } else {
+                    $value = Read-Host -Prompt "  $($pr.prompt)"
                 }
                 $configLinesToAdd += "`$$($pr.var) = `"$value`""
             } else {

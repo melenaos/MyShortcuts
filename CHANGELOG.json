@@ -61,5 +61,11 @@
     "notes": [
       "Added a 'push' feature (-push / -gp): runs git add -A, prompts for a commit message (aborts if empty), commits and pushes, in the project directory. Not part of -all by default. Pre-checked in the .NET and Simple project types."
     ]
+  },
+  {
+    "version": "1.0.10",
+    "notes": [
+      "Fixed -edit (Add predefined feature) not honoring a prompt's 'detect' field: adding the solution/compile feature to an existing script now proposes an existing .slnx/.sln found in the project folder (Enter = use existing <file>), matching the -new wizard. Previously it fell through to a plain prompt."
+    ]
   }
 ]
