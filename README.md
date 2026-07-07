@@ -4,7 +4,7 @@ A PowerShell toolkit for creating launcher scripts that give you quick access to
 
 ```powershell
 MyProject -all        # opens IDE, starts tunnel, launches everything
-MyProject -project    # just open the solution in Visual Studio
+MyProject -solution   # just open the solution in Visual Studio (-sln)
 MyProject -claude     # open Claude Code in the project directory
 ```
 
@@ -80,7 +80,7 @@ When creating or editing a shortcut, you can pick from these built-in features:
 |---------|--------|-------|-------------|
 | Directory | `-d` | project | Change to project folder |
 | Explorer | `-exp` | project | Open project folder in Windows Explorer |
-| Project | `-p` | project | Open `.sln` in Visual Studio |
+| Solution | `-solution` / `-sln` | project | Open the VS solution (auto-detects `.sln`/`.slnx`) |
 | Code | `-code` | project | Open project in VS Code |
 | Claude | `-claude` | project | Open Claude Code in the project directory |
 | Compile | `-release` / `-debug` | project | Build with dotnet |

@@ -7,16 +7,11 @@
   {
     "id": "dotnet",
     "label": ".NET — Visual Studio / dotnet",
-    "features": ["directory", "explorer", "project", "compile", "code", "claude", "tunnel", "azurite"]
+    "features": ["directory", "explorer", "project", "compile", "code", "claude"]
   },
   {
-    "id": "node",
-    "label": "Node.js — editor-centric",
-    "features": ["directory", "explorer", "code", "claude"]
-  },
-  {
-    "id": "python",
-    "label": "Python — editor-centric",
+    "id": "simple",
+    "label": "Simple — editor-centric (VS Code + Claude)",
     "features": ["directory", "explorer", "code", "claude"]
   }
 ]

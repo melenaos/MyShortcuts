@@ -46,5 +46,14 @@
     "notes": [
       "Split features into config/features.json (built-in, synced by -update) and config/features.local.json (your own custom features, never touched by -update), merged at runtime by Get-MergedFeatures. This mirrors the projectTypes.json/.local split and lets a downstream fork carry custom features that survive updates from upstream. If you have no features.local.json, behavior is unchanged."
     ]
+  },
+  {
+    "version": "1.0.8",
+    "notes": [
+      "Renamed the 'open solution' switch from -project/-p to -solution/-sln.",
+      "The solution feature now finds the solution automatically: at run time it opens an explicitly configured $sln if present, otherwise auto-detects a solution file in the project folder, preferring the modern .slnx over .sln. Compile (-release/-debug) uses the same detection. The -new wizard proposes an existing solution file it finds in the chosen folder (Enter = use existing <file>).",
+      "Added a data-driven 'detect' field for feature prompts (array of glob patterns) that powers the wizard's solution proposal; documented in CLAUDE.md.",
+      "Project types: dropped tunnel and azurite from the pre-checked .NET set, and merged the identical Node.js and Python types into a single 'Simple - editor-centric' type."
+    ]
   }
 ]

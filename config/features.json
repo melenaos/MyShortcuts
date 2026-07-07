@@ -19,14 +19,14 @@
   },
   {
     "id": "project",
-    "label": "Project — open solution in Visual Studio (-p)",
+    "label": "Solution — open the VS solution (-solution / -sln)",
     "snippet": "project.ps1",
     "scope": "project",
     "params": [
-      { "name": "project", "alias": "p", "type": "switch" }
+      { "name": "solution", "alias": "sln", "type": "switch" }
     ],
     "prompts": [
-      { "var": "sln", "prompt": "Solution name", "default": "{{projectName}}.sln" }
+      { "var": "sln", "prompt": "Solution name", "detect": ["*.slnx", "*.sln"] }
     ]
   },
   {
@@ -59,7 +59,7 @@
       { "name": "debug", "alias": null, "type": "switch" }
     ],
     "prompts": [
-      { "var": "sln", "prompt": "Solution name", "default": "{{projectName}}.sln" }
+      { "var": "sln", "prompt": "Solution name", "detect": ["*.slnx", "*.sln"] }
     ]
   },
   {

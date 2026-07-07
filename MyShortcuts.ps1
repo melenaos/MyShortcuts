@@ -208,6 +208,24 @@ function Exec-NewWizard {
                     $value = $defaultVal
                 }
                 $promptVars[$pr.var] = @{ value = $value; useSettings = $false }
+            } elseif ($pr.detect) {
+                # Scan the chosen project folder for an existing file matching the
+                # detect globs (in order) and propose it as the default. If none is
+                # found, prompt plainly — the snippet's own run-time detection is the
+                # fallback for a project that doesn't exist yet or gets renamed later.
+                $resolvedDir = if ($isAbsolute) { $dirPath } else { Join-Path $s.devDirectory $dirPath }
+                $detected = $null
+                foreach ($pat in $pr.detect) {
+                    $hit = @(Get-ChildItem -Path $resolvedDir -Filter $pat -File -ErrorAction SilentlyContinue) | Select-Object -First 1
+                    if ($hit) { $detected = $hit.Name; break }
+                }
+                if ($detected) {
+                    $value = Read-Host -Prompt "  $($pr.prompt) (Enter = use existing $detected)"
+                    if ([string]::IsNullOrWhiteSpace($value)) { $value = $detected }
+                } else {
+                    $value = Read-Host -Prompt "  $($pr.prompt)"
+                }
+                $promptVars[$pr.var] = @{ value = $value; useSettings = $false }
             } else {
                 $value = Read-Host -Prompt "  $($pr.prompt)"
                 $promptVars[$pr.var] = @{ value = $value; useSettings = $false }

@@ -53,7 +53,7 @@ The engine references **no feature by id** — all feature-specific behavior is 
 - **project-scoped** features (`directory`, `explorer`, `project`, `code`, `claude`, `compile`) operate on the script's single `$projectDir`.
 - **global** features (`tunnel`, `azurite`) have no directory association.
 
-Prompts may declare a `default` (e.g. `"{{projectName}}.sln"` for `sln`) which is shown as `(Enter = <expanded default>)` and used when the user presses Enter without typing a value. Prompts with `settingsKey` instead pull their default from `settings.json` (e.g. `tunnelName`).
+Prompts may declare a `default` (a literal, with `{{projectName}}` expanded) which is shown as `(Enter = <expanded default>)` and used when the user presses Enter without typing a value. Prompts with `settingsKey` instead pull their default from `settings.json` (e.g. `tunnelName`). Prompts with `detect` (an array of glob patterns, e.g. `["*.slnx", "*.sln"]` for `sln`) scan the chosen project folder at wizard time and propose the first matching file as `(Enter = use existing <file>)`; if nothing matches, it falls back to a plain prompt (the snippet's own run-time detection covers a project that doesn't exist yet at creation or gets renamed later). These three are mutually exclusive per prompt — the engine checks `settingsKey`, then `default`, then `detect`.
 
 `config/projectTypes.json` defines the project-type registry — a grouping layer over features. Each type has an `id`, display `label`, and a `features` array of feature ids. A type only sets the **initial checkbox state** in the wizard; it locks nothing, and the full feature list is always shown. The `blank` type (empty `features`) exists so the tool never forces a stack. If both type files are missing/empty, the wizard skips the type step and falls back to an all-unchecked checklist.
 
@@ -74,14 +74,14 @@ Each shortcut script maps to exactly one project directory and follows a consist
 - `$sln` — solution file name, if the `project`/`compile` feature was selected
 - `$tunnelName` — Cloudflared tunnel name (global)
 
-**Switch naming:** every feature param uses its plain name — `-directory`, `-claude`, `-code`, `-project`, etc. (no per-directory suffixing).
+**Switch naming:** every feature param uses its plain name — `-directory`, `-claude`, `-code`, `-solution`, etc. (no per-directory suffixing).
 
 **Common switches** (present in most scripts):
 | Switch | Alias | Action |
 |--------|-------|--------|
 | `-directory` | `-d` | Open the project directory |
 | `-explorer` | `-exp` | Open the project directory in Windows Explorer |
-| `-project` | `-p` | Open `.sln` in Visual Studio |
+| `-solution` | `-sln` | Open the VS solution (auto-detects `.sln`/`.slnx`) |
 | `-all` | `-a` | Run all launch actions together |
 | `-release` | | dotnet build in Release config |
 | `-debug` | | dotnet build in Debug config |
