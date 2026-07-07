@@ -84,6 +84,7 @@ When creating or editing a shortcut, you can pick from these built-in features:
 | Code | `-code` | project | Open project in VS Code |
 | Claude | `-claude` | project | Open Claude Code in the project directory |
 | Compile | `-release` / `-debug` | project | Build with dotnet |
+| Push | `-push` / `-gp` | project | git add -A, commit (prompts for message) & push |
 | Tunnel | `-tunnel` | global | Start a Cloudflared tunnel |
 | Azurite | `-azurite` | global | Start Azure storage emulator locally |
 

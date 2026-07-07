@@ -63,6 +63,16 @@
     ]
   },
   {
+    "id": "push",
+    "label": "Push — git add, commit & push (-push)",
+    "snippet": "push.ps1",
+    "scope": "project",
+    "inGroupByDefault": false,
+    "params": [
+      { "name": "push", "alias": "gp", "type": "switch" }
+    ]
+  },
+  {
     "id": "tunnel",
     "label": "Tunnel — start Cloudflared tunnel (-tunnel)",
     "snippet": "tunnel.ps1",

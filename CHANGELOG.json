@@ -55,5 +55,11 @@
       "Added a data-driven 'detect' field for feature prompts (array of glob patterns) that powers the wizard's solution proposal; documented in CLAUDE.md.",
       "Project types: dropped tunnel and azurite from the pre-checked .NET set, and merged the identical Node.js and Python types into a single 'Simple - editor-centric' type."
     ]
+  },
+  {
+    "version": "1.0.9",
+    "notes": [
+      "Added a 'push' feature (-push / -gp): runs git add -A, prompts for a commit message (aborts if empty), commits and pushes, in the project directory. Not part of -all by default. Pre-checked in the .NET and Simple project types."
+    ]
   }
 ]
