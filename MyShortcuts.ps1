@@ -71,6 +71,28 @@ function Get-MergedProjectTypes {
     return $merged
 }
 
+function Get-MergedFeatures {
+    param([string]$BuiltinPath, [string]$LocalPath)
+
+    $builtinFeatures = @()
+    if (Test-Path $BuiltinPath) {
+        $builtinFeatures = @(Get-Content -Path $BuiltinPath -Raw | ConvertFrom-Json)
+    }
+
+    $localFeatures = @()
+    if (Test-Path $LocalPath) {
+        $localFeatures = @(Get-Content -Path $LocalPath -Raw | ConvertFrom-Json)
+    }
+
+    # A local feature with the same id as a built-in shadows it; new local ids
+    # append. This lets a downstream fork carry custom features (and override
+    # shipped ones) in an update-safe file the engine merges at runtime.
+    $localIds = @($localFeatures | ForEach-Object { $_.id })
+    $merged = @($builtinFeatures | Where-Object { $localIds -notcontains $_.id })
+    $merged += $localFeatures
+    return $merged
+}
+
 function Get-ProjectDirRef {
     param([string[]]$lines)
     foreach ($line in $lines) {
@@ -87,8 +109,9 @@ function Exec-NewWizard {
     # Dot-source the interactive menu library
     . "$PSScriptRoot\lib\InteractiveMenu.ps1"
 
-    # Load config
-    $features = Get-Content -Path "$PSScriptRoot\config\features.json" -Raw | ConvertFrom-Json
+    # Load config. Built-in features ship with the engine and are overwritten by
+    # -update; local features are a fork's own additions and are never touched.
+    $features = Get-MergedFeatures -BuiltinPath "$PSScriptRoot\config\features.json" -LocalPath "$PSScriptRoot\config\features.local.json"
 
     # --- Step 1: Project name ---
     Write-Host ""
@@ -712,7 +735,7 @@ function Exec-AddFeature {
     }
 
     # Load features and filter out already-present ones
-    $features = Get-Content -Path "$PSScriptRoot\config\features.json" -Raw | ConvertFrom-Json
+    $features = Get-MergedFeatures -BuiltinPath "$PSScriptRoot\config\features.json" -LocalPath "$PSScriptRoot\config\features.local.json"
     $existingParams = Get-ExistingParams -lines $lines
     $existingVars = Get-ExistingConfigVars -lines $lines
     $projectDirRef = Get-ProjectDirRef -lines $lines

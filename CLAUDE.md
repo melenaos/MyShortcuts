@@ -33,7 +33,7 @@ The repo root has a `VERSION` file (plain semver string, e.g. `1.0.0`) bumped wh
 - `VERSION`, `CHANGELOG.json`, `MyShortcuts.ps1`, `lib/InteractiveMenu.ps1`, `config/features.json`, `config/projectTypes.json`, `CLAUDE.md`, `README.md` — hardcoded list in `Get-EngineFileList`
 - `templates/snippets/*` — discovered dynamically via the GitHub Contents API so new snippets get pulled without an engine change
 
-This is a plain overwrite-sync, not a migration system: there's no per-version transform step, so it only works because engine changes so far have been additive/compatible. It never touches `settings.json`, `.claude/`, any per-project shortcut script, or `config/projectTypes.local.json` — those are the files that distinguish a downstream clone (like a forked or copied shortcuts repo) from this repo, and the ones a user actually customizes. `$UpdateRepoOwner`/`$UpdateRepoName`/`$UpdateBranch` at the top of the Update region point at `melenaos/MyShortcuts`/`main`; a fork that wants to self-update from its own fork instead of upstream would need to change those.
+This is a plain overwrite-sync, not a migration system: there's no per-version transform step, so it only works because engine changes so far have been additive/compatible. It never touches `settings.json`, `.claude/`, any per-project shortcut script, `config/projectTypes.local.json`, or `config/features.local.json` — those are the files that distinguish a downstream clone (like a forked or copied shortcuts repo) from this repo, and the ones a user actually customizes. (Custom `templates/snippets/*` are also safe: the sync only downloads snippet names that exist upstream, never deleting fork-only ones.) `$UpdateRepoOwner`/`$UpdateRepoName`/`$UpdateBranch` at the top of the Update region point at `melenaos/MyShortcuts`/`main`; a fork that wants to self-update from its own fork instead of upstream would need to change those.
 
 ### Configuration
 
@@ -47,6 +47,8 @@ This is a plain overwrite-sync, not a migration system: there's no per-version t
 - `placeholders` (object) — extra `{{name}} -> value` substitutions passed to the snippet beyond the standard `dir`/`switch`/`label`. `compile` uses this for `{{switchRelease}}`/`{{switchDebug}}`.
 
 The engine references **no feature by id** — all feature-specific behavior is declared in these data fields, so new features never require engine changes.
+
+`config/features.json` is **engine-owned** — it ships with the tool and is overwritten by `-update`. Custom features instead live in `config/features.local.json`, a sibling file that `-update` never touches (it's not in `Get-EngineFileList`'s whitelist). `Get-MergedFeatures` reads both and merges them wherever the engine loads features (the `-new` wizard and `-edit`'s Add-feature flow), with a local feature shadowing a built-in of the same `id` and new local ids appended. This mirrors the `projectTypes.json`/`.local` split below and is what lets a downstream fork carry custom features that survive updates from upstream: put the fork's features in `features.local.json` and its snippets in `templates/snippets/` (also never deleted by `-update`), and point `-update` at upstream — both ride along untouched. With no `features.local.json` present, behavior is identical to reading `features.json` alone.
 
 - **project-scoped** features (`directory`, `explorer`, `project`, `code`, `claude`, `compile`) operate on the script's single `$projectDir`.
 - **global** features (`tunnel`, `azurite`) have no directory association.

@@ -40,5 +40,11 @@
     "notes": [
       "Updated README.md and CLAUDE.md to document the -d/-e change from 1.0.5 (README's usage table and CLAUDE.md's manager description previously still referenced the removed -t switch)."
     ]
+  },
+  {
+    "version": "1.0.7",
+    "notes": [
+      "Split features into config/features.json (built-in, synced by -update) and config/features.local.json (your own custom features, never touched by -update), merged at runtime by Get-MergedFeatures. This mirrors the projectTypes.json/.local split and lets a downstream fork carry custom features that survive updates from upstream. If you have no features.local.json, behavior is unchanged."
+    ]
   }
 ]

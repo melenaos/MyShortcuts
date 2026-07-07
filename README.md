@@ -57,6 +57,10 @@ Project types are a named bundle of feature ids that pre-checks the wizard's fea
 
 Built-in types live in `config/projectTypes.json`; anything you save (via "save this selection as a project type" at the end of the wizard) goes into `config/projectTypes.local.json` instead. This split exists so `MyShortcuts -update` can safely refresh the built-in list without wiping out your own saved types.
 
+### Custom features
+
+The built-in feature list lives in `config/features.json` (engine-owned, refreshed by `-update`). To add your own feature — a new switch backed by a snippet in `templates/snippets/` — put its definition in `config/features.local.json` instead. The engine merges the two at runtime (a local feature with the same `id` overrides a built-in; new ids are added), and `-update` never touches the local file or your custom snippets. This is what lets a fork carry its own features and still `-update` from upstream without losing them.
+
 ## Usage
 
 | Command | What it does |
