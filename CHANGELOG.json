@@ -67,5 +67,11 @@
     "notes": [
       "Fixed -edit (Add predefined feature) not honoring a prompt's 'detect' field: adding the solution/compile feature to an existing script now proposes an existing .slnx/.sln found in the project folder (Enter = use existing <file>), matching the -new wizard. Previously it fell through to a plain prompt."
     ]
+  },
+  {
+    "version": "1.0.11",
+    "notes": [
+      "Reworked 'push': removed it as a per-project feature and added it as a MyShortcuts manager command instead. Run 'MyShortcuts -push' (alias -p) to back up the MyShortcuts folder itself to GitHub — git add -A, prompts for a commit message (aborts if empty), commits and pushes. Use it after -new/-edit to save your shortcut scripts to your fork. If you added the old per-project push feature to a shortcut, that script keeps working; the feature is just no longer offered by -new/-edit."
+    ]
   }
 ]

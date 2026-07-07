@@ -7,11 +7,11 @@
   {
     "id": "dotnet",
     "label": ".NET — Visual Studio / dotnet",
-    "features": ["directory", "explorer", "project", "compile", "code", "claude", "push"]
+    "features": ["directory", "explorer", "project", "compile", "code", "claude"]
   },
   {
     "id": "simple",
     "label": "Simple — editor-centric (VS Code + Claude)",
-    "features": ["directory", "explorer", "code", "claude", "push"]
+    "features": ["directory", "explorer", "code", "claude"]
   }
 ]

@@ -17,6 +17,9 @@ Displays all the available shortcuts
 .PARAMETER update
 Checks GitHub for a newer engine version and, if found, downloads and overwrites the engine files (MyShortcuts.ps1, lib/, templates/, config/, VERSION) in place. Your own shortcut scripts and settings.json are never touched.
 
+.PARAMETER push
+Backs up the MyShortcuts folder itself to GitHub: runs git add -A, prompts for a commit message, then commits and pushes. Use it after -new/-edit to save your new or changed shortcut scripts to your fork.
+
 .EXAMPLE
 PS> .\MyShortcuts -d
 
@@ -35,7 +38,9 @@ PS> .\MyShortcuts -new
     [Alias('l')]
     [switch]$list = $false,
     [switch]$edit = $false,
-    [switch]$update = $false
+    [switch]$update = $false,
+    [Alias('p')]
+    [switch]$push = $false
  )
 
 
@@ -678,6 +683,30 @@ function Exec-Explorer {
     Invoke-Item $PSScriptRoot
 }
 
+function Exec-Push {
+    # Back up the MyShortcuts folder (this repo) to GitHub.
+    Push-Location $PSScriptRoot
+    try {
+        git rev-parse --is-inside-work-tree 2>$null | Out-Null
+        if ($LASTEXITCODE -ne 0) {
+            Write-Host "  $PSScriptRoot is not a git repository." -ForegroundColor DarkYellow
+            Write-Host "  Set one up first (git init, then git remote add origin <url>)." -ForegroundColor DarkYellow
+            return
+        }
+        $msg = Read-Host -Prompt "  Commit message"
+        if ([string]::IsNullOrWhiteSpace($msg)) {
+            Write-Host "  Aborted: empty commit message." -ForegroundColor DarkYellow
+            return
+        }
+        git add -A
+        git commit -m "$msg"
+        git push
+    }
+    finally {
+        Pop-Location
+    }
+}
+
 function Find-MarkerLines {
     param([string[]]$lines)
     $markers = @{ params = -1; help = -1; commands = -1 }
@@ -1138,7 +1167,7 @@ $s = Get-Settings
 $editorPath = if ($s.editorPath) { $s.editorPath } else { 'notepad.exe' }
 
 # First-run: prompt for devDirectory if not configured
-if (-not $s.devDirectory -and -not $directory -and -not $explorer -and -not $list -and -not $update) {
+if (-not $s.devDirectory -and -not $directory -and -not $explorer -and -not $list -and -not $update -and -not $push) {
     Write-Host ""
     Write-Host "  Base development folder is not configured." -ForegroundColor DarkYellow
     $devDir = Read-Host -Prompt "  Enter your base development folder (e.g. C:\GitHub)"
@@ -1171,6 +1200,9 @@ elseif ($list){
 }
 elseif ($update){
    Exec-Update
+}
+elseif ($push){
+   Exec-Push
 }
 else{
     Write-Host "Execute 'Get-Help MyShortcut.ps1 -full' to learn more"

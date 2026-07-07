@@ -71,6 +71,7 @@ The built-in feature list lives in `config/features.json` (engine-owned, refresh
 | `MyShortcuts -d` | Open the MyShortcuts folder in the terminal and list it |
 | `MyShortcuts -e` | Open the MyShortcuts folder in Windows Explorer |
 | `MyShortcuts -update` | Pull the latest engine files from GitHub |
+| `MyShortcuts -push` / `-p` | Back up the MyShortcuts folder to GitHub (git add, commit, push) |
 
 ## Available Features
 
@@ -84,7 +85,6 @@ When creating or editing a shortcut, you can pick from these built-in features:
 | Code | `-code` | project | Open project in VS Code |
 | Claude | `-claude` | project | Open Claude Code in the project directory |
 | Compile | `-release` / `-debug` | project | Build with dotnet |
-| Push | `-push` / `-gp` | project | git add -A, commit (prompts for message) & push |
 | Tunnel | `-tunnel` | global | Start a Cloudflared tunnel |
 | Azurite | `-azurite` | global | Start Azure storage emulator locally |
 

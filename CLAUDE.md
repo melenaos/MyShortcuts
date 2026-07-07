@@ -23,6 +23,7 @@ Manages the shortcut collection itself. Key capabilities:
 - `-list` lists all available `.ps1`/`.bat` shortcuts.
 - `-directory` / `-d` opens the MyShortcuts folder in the terminal and lists it. `-explorer` / `-e` opens the same folder in Windows Explorer instead.
 - `-update` checks the `VERSION` file on GitHub against the local one and, if newer, re-downloads the engine files in place (see **Self-update** below).
+- `-push` / `-p` backs up the MyShortcuts folder itself (`$PSScriptRoot`) to GitHub — `git add -A`, prompts for a commit message (aborts if empty), then `git commit` and `git push` (`Exec-Push`). Intended for saving newly created/edited shortcut scripts to the user's fork. It guards on the folder being a git repo and is exempt from the first-run `devDirectory` prompt.
 - The MyShortcuts directory is auto-registered in the user's `PATH` on first run, and the user is prompted for `devDirectory` on first run if it isn't configured yet.
 
 ### Self-update
@@ -50,7 +51,7 @@ The engine references **no feature by id** — all feature-specific behavior is 
 
 `config/features.json` is **engine-owned** — it ships with the tool and is overwritten by `-update`. Custom features instead live in `config/features.local.json`, a sibling file that `-update` never touches (it's not in `Get-EngineFileList`'s whitelist). `Get-MergedFeatures` reads both and merges them wherever the engine loads features (the `-new` wizard and `-edit`'s Add-feature flow), with a local feature shadowing a built-in of the same `id` and new local ids appended. This mirrors the `projectTypes.json`/`.local` split below and is what lets a downstream fork carry custom features that survive updates from upstream: put the fork's features in `features.local.json` and its snippets in `templates/snippets/` (also never deleted by `-update`), and point `-update` at upstream — both ride along untouched. With no `features.local.json` present, behavior is identical to reading `features.json` alone.
 
-- **project-scoped** features (`directory`, `explorer`, `project`, `code`, `claude`, `compile`, `push`) operate on the script's single `$projectDir`.
+- **project-scoped** features (`directory`, `explorer`, `project`, `code`, `claude`, `compile`) operate on the script's single `$projectDir`.
 - **global** features (`tunnel`, `azurite`) have no directory association.
 
 Prompts may declare a `default` (a literal, with `{{projectName}}` expanded) which is shown as `(Enter = <expanded default>)` and used when the user presses Enter without typing a value. Prompts with `settingsKey` instead pull their default from `settings.json` (e.g. `tunnelName`). Prompts with `detect` (an array of glob patterns, e.g. `["*.slnx", "*.sln"]` for `sln`) scan the chosen project folder at wizard time and propose the first matching file as `(Enter = use existing <file>)`; if nothing matches, it falls back to a plain prompt (the snippet's own run-time detection covers a project that doesn't exist yet at creation or gets renamed later). These three are mutually exclusive per prompt — the engine checks `settingsKey`, then `default`, then `detect`.
@@ -85,7 +86,6 @@ Each shortcut script maps to exactly one project directory and follows a consist
 | `-all` | `-a` | Run all launch actions together |
 | `-release` | | dotnet build in Release config |
 | `-debug` | | dotnet build in Debug config |
-| `-push` | `-gp` | git add -A, commit (prompts for message) & push |
 | `-code` | | Open project in VS Code |
 | `-tunnel` | | Start Cloudflared tunnel |
 | `-claude` | | Open Claude Code in the project directory |
