@@ -73,5 +73,15 @@
     "notes": [
       "Reworked 'push': removed it as a per-project feature and added it as a MyShortcuts manager command instead. Run 'MyShortcuts -push' (alias -p) to back up the MyShortcuts folder itself to GitHub — git add -A, prompts for a commit message (aborts if empty), commits and pushes. Use it after -new/-edit to save your shortcut scripts to your fork. If you added the old per-project push feature to a shortcut, that script keeps working; the feature is just no longer offered by -new/-edit."
     ]
+  },
+  {
+    "version": "1.0.12",
+    "notes": [
+      "The -new wizard's folder step is now a navigator: '..' walks up (past the base folder too), subfolders descend on Enter, '[ Select this folder ]' picks the current folder, and '[ Enter path manually... ]' still lets you type a path. The chosen folder is always saved as an ABSOLUTE path in $projectDir, so a shortcut keeps working even if devDirectory later moves.",
+      "Project-type menu reordered: your own saved (local) types now appear on top, newest first, and 'Blank — start from scratch' is always last.",
+      "Explorer shortcut is now -x everywhere: 'MyShortcuts -x' opens the MyShortcuts folder, and the per-project explorer feature uses -x (previously -e for the manager and -exp for scripts). Existing generated scripts keep their old -exp switch until re-created.",
+      "The wizard only offers to save your selection as a project type when you actually changed it from the chosen type's defaults, instead of asking every time.",
+      "The custom-command prompt now shows (y/N) with No as the default (pressing Enter skips)."
+    ]
   }
 ]

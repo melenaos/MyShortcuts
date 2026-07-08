@@ -69,7 +69,7 @@ The built-in feature list lives in `config/features.json` (engine-owned, refresh
 | `MyShortcuts -edit` | Add features or custom commands to an existing shortcut |
 | `MyShortcuts -list` | List all available shortcuts |
 | `MyShortcuts -d` | Open the MyShortcuts folder in the terminal and list it |
-| `MyShortcuts -e` | Open the MyShortcuts folder in Windows Explorer |
+| `MyShortcuts -x` | Open the MyShortcuts folder in Windows Explorer |
 | `MyShortcuts -update` | Pull the latest engine files from GitHub |
 | `MyShortcuts -push` / `-p` | Back up the MyShortcuts folder to GitHub (git add, commit, push) |
 
@@ -80,7 +80,7 @@ When creating or editing a shortcut, you can pick from these built-in features:
 | Feature | Switch | Scope | What it does |
 |---------|--------|-------|-------------|
 | Directory | `-d` | project | Change to project folder |
-| Explorer | `-exp` | project | Open project folder in Windows Explorer |
+| Explorer | `-x` | project | Open project folder in Windows Explorer |
 | Solution | `-solution` / `-sln` | project | Open the VS solution (auto-detects `.sln`/`.slnx`) |
 | Code | `-code` | project | Open project in VS Code |
 | Claude | `-claude` | project | Open Claude Code in the project directory |

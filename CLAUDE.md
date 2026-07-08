@@ -18,10 +18,10 @@ Get-ChildItem -Path .\ -Recurse -Filter *.ps1 | Unblock-File
 ### MyShortcuts.ps1 — The Manager
 
 Manages the shortcut collection itself. Key capabilities:
-- `-new` launches an interactive wizard to create a new shortcut script from feature snippets in `templates/snippets/`. The wizard first asks for a **project type** (from `config/projectTypes.json`), which pre-checks a set of features in the checklist; the user can then freely toggle any feature. At the end it optionally offers to save the current selection as a new project type.
+- `-new` launches an interactive wizard to create a new shortcut script from feature snippets in `templates/snippets/`. Step 2 is a **folder navigator** rooted at `devDirectory`: `..` walks up (past the root too), subfolders descend on Enter, and `[ Select this folder ]` picks the folder currently shown (or `[ Enter path manually... ]` to type one). The chosen path is always written **absolute** into `$projectDir`, so a shortcut keeps working even if `devDirectory` later moves. The wizard then asks for a **project type** (from `config/projectTypes.json` + `.local`), which pre-checks a set of features in the checklist; the user can then freely toggle any feature. At the end it offers to save the current selection as a new project type — but **only if the selection diverged** from the chosen type's pre-checked set (an unchanged selection would just duplicate an existing type).
 - `-edit` opens an action menu for an existing shortcut: **Add predefined feature**, **Add custom command**, or **Open in editor**.
 - `-list` lists all available `.ps1`/`.bat` shortcuts.
-- `-directory` / `-d` opens the MyShortcuts folder in the terminal and lists it. `-explorer` / `-e` opens the same folder in Windows Explorer instead.
+- `-directory` / `-d` opens the MyShortcuts folder in the terminal and lists it. `-explorer` / `-x` opens the same folder in Windows Explorer instead.
 - `-update` checks the `VERSION` file on GitHub against the local one and, if newer, re-downloads the engine files in place (see **Self-update** below).
 - `-push` / `-p` backs up the MyShortcuts folder itself (`$PSScriptRoot`) to GitHub — `git add -A`, prompts for a commit message (aborts if empty), then `git commit` and `git push` (`Exec-Push`). Intended for saving newly created/edited shortcut scripts to the user's fork. It guards on the folder being a git repo and is exempt from the first-run `devDirectory` prompt.
 - The MyShortcuts directory is auto-registered in the user's `PATH` on first run, and the user is prompted for `devDirectory` on first run if it isn't configured yet.
@@ -58,7 +58,7 @@ Prompts may declare a `default` (a literal, with `{{projectName}}` expanded) whi
 
 `config/projectTypes.json` defines the project-type registry — a grouping layer over features. Each type has an `id`, display `label`, and a `features` array of feature ids. A type only sets the **initial checkbox state** in the wizard; it locks nothing, and the full feature list is always shown. The `blank` type (empty `features`) exists so the tool never forces a stack. If both type files are missing/empty, the wizard skips the type step and falls back to an all-unchecked checklist.
 
-`config/projectTypes.json` is **engine-owned** — it ships with the tool and is overwritten by `-update`. User-saved types instead live in `config/projectTypes.local.json`, a sibling file that `-update` never touches (it's not in `Get-EngineFileList`'s whitelist). `Get-MergedProjectTypes` reads both and merges them for the wizard's type-selection step, with a local type shadowing a built-in of the same `id` — so users can customize a shipped type without editing the engine file it'd otherwise be overwritten with. Answering "save this selection as a project type" at the end of the wizard always appends/replaces by `id` into `projectTypes.local.json`, never into `projectTypes.json`.
+`config/projectTypes.json` is **engine-owned** — it ships with the tool and is overwritten by `-update`. User-saved types instead live in `config/projectTypes.local.json`, a sibling file that `-update` never touches (it's not in `Get-EngineFileList`'s whitelist). `Get-MergedProjectTypes` reads both and merges them for the wizard's type-selection step, with a local type shadowing a built-in of the same `id` — so users can customize a shipped type without editing the engine file it'd otherwise be overwritten with. The merged list is ordered for the menu as: user (local) types first, newest first (saves append to the local file, so it reverses them); then the remaining built-ins in file order; then `blank` always last. So the default cursor lands on the user's most recent custom type, and "start from scratch" sits at the bottom. Answering "save this selection as a project type" at the end of the wizard always appends/replaces by `id` into `projectTypes.local.json`, never into `projectTypes.json`.
 
 ### lib/InteractiveMenu.ps1
 
@@ -71,7 +71,7 @@ Two reusable console UI functions used by the wizard and edit flows:
 Each shortcut script maps to exactly one project directory and follows a consistent pattern:
 
 **Configuration block** (top of every script):
-- `$projectDir` — the project's folder path (e.g. `"$($settings.devDirectory)\MyProject"` or an absolute path)
+- `$projectDir` — the project's folder path. The `-new` wizard now always writes this as an absolute path (e.g. `"C:\GitHub\MyProject"`); older scripts may still use the relative form `"$($settings.devDirectory)\MyProject"`, which `-edit` continues to resolve
 - `$sln` — solution file name, if the `project`/`compile` feature was selected
 - `$tunnelName` — Cloudflared tunnel name (global)
 
@@ -81,7 +81,7 @@ Each shortcut script maps to exactly one project directory and follows a consist
 | Switch | Alias | Action |
 |--------|-------|--------|
 | `-directory` | `-d` | Open the project directory |
-| `-explorer` | `-exp` | Open the project directory in Windows Explorer |
+| `-explorer` | `-x` | Open the project directory in Windows Explorer |
 | `-solution` | `-sln` | Open the VS solution (auto-detects `.sln`/`.slnx`) |
 | `-all` | `-a` | Run all launch actions together |
 | `-release` | | dotnet build in Release config |

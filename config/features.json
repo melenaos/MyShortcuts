@@ -10,11 +10,11 @@
   },
   {
     "id": "explorer",
-    "label": "Explorer — open project folder in explorer (-exp)",
+    "label": "Explorer — open project folder in explorer (-x)",
     "snippet": "explorer.ps1",
     "scope": "project",
     "params": [
-      { "name": "explorer", "alias": "exp", "type": "switch" }
+      { "name": "explorer", "alias": "x", "type": "switch" }
     ]
   },
   {
