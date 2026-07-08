@@ -139,58 +139,31 @@ function Exec-NewWizard {
     $filename = $projectName
     Write-Host ""
 
-    # --- Step 2: Define directory (folder navigator) ---
-    # A navigator rooted at devDirectory: ".." walks up (past the root too),
-    # subfolders descend on Enter, and "[ Select this folder ]" picks the folder
-    # currently shown. The chosen path is always stored ABSOLUTE, so a shortcut
-    # keeps working even if devDirectory later moves.
-    $startDir = if ($s.devDirectory -and (Test-Path -Path $s.devDirectory -PathType Container)) {
-        (Resolve-Path -Path $s.devDirectory).Path
-    } else {
-        (Get-Location).Path
+    # --- Step 2: Define directory ---
+    $existingFolders = @()
+    if ($s.devDirectory -and (Test-Path -Path $s.devDirectory -PathType Container)) {
+        $existingFolders = @(Get-ChildItem -Path $s.devDirectory -Directory | Select-Object -ExpandProperty Name | Sort-Object)
     }
-    $currentDir = $startDir
-    $dirPath = $null
-    $isAbsolute = $true
 
-    while ($true) {
-        $subDirs = @(Get-ChildItem -Path $currentDir -Directory -ErrorAction SilentlyContinue |
-            Select-Object -ExpandProperty Name | Sort-Object)
-        $parent = Split-Path -Path $currentDir -Parent   # '' at a drive root
-
-        $navOptions = @("[ Select this folder ]  ($currentDir)")
-        $upIndex = -1
-        if ($parent) { $navOptions += ".."; $upIndex = $navOptions.Count - 1 }
-        $firstSubIndex = $navOptions.Count
-        foreach ($d in $subDirs) { $navOptions += "$d\" }
-        $manualIndex = $navOptions.Count
-        $navOptions += "[ Enter path manually... ]"
-
-        $navChoice = Show-SelectionMenu -Title "Navigate to project folder" -Options $navOptions
-
-        if ($navChoice -eq 0) {
-            $dirPath = $currentDir
-            break
-        } elseif ($navChoice -eq $upIndex) {
-            $currentDir = $parent
-        } elseif ($navChoice -eq $manualIndex) {
-            $manual = Read-Host -Prompt "  Project folder or full path (BasePath: $currentDir, default: \$projectName\)"
-            if ([string]::IsNullOrWhiteSpace($manual)) { $manual = $projectName }
-            $manual = $manual.TrimStart('\')
-            if ([System.IO.Path]::IsPathRooted($manual)) {
-                $dirPath = $manual
-            } else {
-                $dirPath = Join-Path -Path $currentDir -ChildPath $manual
-            }
-            break
+    if ($existingFolders.Count -gt 0) {
+        $folderOptions = @($existingFolders) + "Enter custom path..."
+        $folderIndex = Show-SelectionMenu -Title "Select project folder (BasePath: $($s.devDirectory))" -Options $folderOptions
+        if ($folderIndex -eq $folderOptions.Count - 1) {
+            $dirPath = Read-Host -Prompt "  Project folder or full path (BasePath: $($s.devDirectory), default: \$projectName\)"
         } else {
-            $currentDir = Join-Path -Path $currentDir -ChildPath ($subDirs[$navChoice - $firstSubIndex])
+            $dirPath = $existingFolders[$folderIndex]
         }
         Write-Host ""
+    } else {
+        $dirPath = Read-Host -Prompt "  Project folder or full path (BasePath: $($s.devDirectory), default: \$projectName\)"
     }
 
-    Write-Host ""
-    Write-Host "  Project folder: $dirPath" -ForegroundColor Green
+    if ([string]::IsNullOrWhiteSpace($dirPath)) {
+        $dirPath = $projectName
+    }
+    $dirPath = $dirPath.TrimStart('\')
+    $isAbsolute = [System.IO.Path]::IsPathRooted($dirPath)
+
     Write-Host ""
 
     # --- Step 3: Project type (pre-selects a set of features; nothing is locked) ---

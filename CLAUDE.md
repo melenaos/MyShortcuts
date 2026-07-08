@@ -18,7 +18,7 @@ Get-ChildItem -Path .\ -Recurse -Filter *.ps1 | Unblock-File
 ### MyShortcuts.ps1 — The Manager
 
 Manages the shortcut collection itself. Key capabilities:
-- `-new` launches an interactive wizard to create a new shortcut script from feature snippets in `templates/snippets/`. Step 2 is a **folder navigator** rooted at `devDirectory`: `..` walks up (past the root too), subfolders descend on Enter, and `[ Select this folder ]` picks the folder currently shown (or `[ Enter path manually... ]` to type one). The chosen path is always written **absolute** into `$projectDir`, so a shortcut keeps working even if `devDirectory` later moves. The wizard then asks for a **project type** (from `config/projectTypes.json` + `.local`), which pre-checks a set of features in the checklist; the user can then freely toggle any feature. At the end it offers to save the current selection as a new project type — but **only if the selection diverged** from the chosen type's pre-checked set (an unchanged selection would just duplicate an existing type).
+- `-new` launches an interactive wizard to create a new shortcut script from feature snippets in `templates/snippets/`. Step 2 selects the project folder: it lists `devDirectory`'s immediate subfolders as a single-select menu plus an "Enter custom path..." option (a relative name resolves under `devDirectory`; an absolute path is stored as-is). The wizard then asks for a **project type** (from `config/projectTypes.json` + `.local`), which pre-checks a set of features in the checklist; the user can then freely toggle any feature. At the end it offers to save the current selection as a new project type — but **only if the selection diverged** from the chosen type's pre-checked set (an unchanged selection would just duplicate an existing type).
 - `-edit` opens an action menu for an existing shortcut: **Add predefined feature**, **Add custom command**, or **Open in editor**.
 - `-list` lists all available `.ps1`/`.bat` shortcuts.
 - `-directory` / `-d` opens the MyShortcuts folder in the terminal and lists it. `-explorer` / `-x` opens the same folder in Windows Explorer instead.
@@ -71,7 +71,7 @@ Two reusable console UI functions used by the wizard and edit flows:
 Each shortcut script maps to exactly one project directory and follows a consistent pattern:
 
 **Configuration block** (top of every script):
-- `$projectDir` — the project's folder path. The `-new` wizard now always writes this as an absolute path (e.g. `"C:\GitHub\MyProject"`); older scripts may still use the relative form `"$($settings.devDirectory)\MyProject"`, which `-edit` continues to resolve
+- `$projectDir` — the project's folder path (e.g. `"$($settings.devDirectory)\MyProject"` or an absolute path)
 - `$sln` — solution file name, if the `project`/`compile` feature was selected
 - `$tunnelName` — Cloudflared tunnel name (global)
 

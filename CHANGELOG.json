@@ -83,5 +83,11 @@
       "The wizard only offers to save your selection as a project type when you actually changed it from the chosen type's defaults, instead of asking every time.",
       "The custom-command prompt now shows (y/N) with No as the default (pressing Enter skips)."
     ]
+  },
+  {
+    "version": "1.0.13",
+    "notes": [
+      "Reverted the -new folder navigator added in 1.0.12: the folder step is back to the original single-select list of your devDirectory's immediate subfolders plus 'Enter custom path...'. A relative name resolves under devDirectory and an absolute path is stored as-is, exactly as before 1.0.12."
+    ]
   }
 ]
