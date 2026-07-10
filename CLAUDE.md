@@ -19,8 +19,9 @@ Get-ChildItem -Path .\ -Recurse -Filter *.ps1 | Unblock-File
 
 Manages the shortcut collection itself. Key capabilities:
 - `-new` launches an interactive wizard to create a new shortcut script from feature snippets in `templates/snippets/`. Step 2 selects the project folder: it lists `devDirectory`'s immediate subfolders as a single-select menu plus an "Enter custom path..." option (a relative name resolves under `devDirectory`; an absolute path is stored as-is). The wizard then asks for a **project type** (from `config/projectTypes.json` + `.local`), which pre-checks a set of features in the checklist; the user can then freely toggle any feature. At the end it offers to save the current selection as a new project type — but **only if the selection diverged** from the chosen type's pre-checked set (an unchanged selection would just duplicate an existing type).
-- `-edit` opens an action menu for an existing shortcut: **Add predefined feature**, **Add custom command**, or **Open in editor**.
+- `-edit` / `-e` opens an action menu for an existing shortcut: **Add predefined feature**, **Add custom command**, or **Open in editor**.
 - `-list` lists all available `.ps1`/`.bat` shortcuts.
+- `-help` / `-h` prints a summary of all commands and their aliases. Running MyShortcuts with no switch shows this same help (`Show-Help`).
 - `-directory` / `-d` opens the MyShortcuts folder in the terminal and lists it. `-explorer` / `-x` opens the same folder in Windows Explorer instead.
 - `-update` checks the `VERSION` file on GitHub against the local one and, if newer, re-downloads the engine files in place (see **Self-update** below).
 - `-push` / `-p` backs up the MyShortcuts folder itself (`$PSScriptRoot`) to GitHub — `git add -A`, prompts for a commit message (aborts if empty), then `git commit` and `git push` (`Exec-Push`). Intended for saving newly created/edited shortcut scripts to the user's fork. It guards on the folder being a git repo and is exempt from the first-run `devDirectory` prompt.
@@ -133,6 +134,6 @@ The generated script layout also uses two config section delimiters that the inj
 - Generated scripts must preserve the three marker comments (`# [/params]`, `# [/help]`, `# [/commands]`) for `-edit` injection to work.
 - Use `-all` to group the common launch actions (directory, project, tunnel, etc.).
 - Use `pushd`/`popd` when temporarily changing directories within a switch block.
-- Use `wt --window 0` to spawn new Windows Terminal tabs for long-running processes (tunnels, claude).
+- Use `wt --window 0` to spawn new Windows Terminal tabs for long-running background processes (e.g. tunnels). The `claude` feature deliberately runs in the current terminal (no new tab, no `pushd`/`popd`) so the shell stays in the project directory after Claude exits.
 - Keep `$projectDir` as the first configuration variable after the settings line.
 - New snippets in `templates/snippets/` should guard on `{{switch}}` and use `{{dir}}`/`{{label}}` for project-scoped features. Global snippets use `{{switch}}` (and any prompt vars) only.

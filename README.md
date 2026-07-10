@@ -66,12 +66,13 @@ The built-in feature list lives in `config/features.json` (engine-owned, refresh
 | Command | What it does |
 |---------|-------------|
 | `MyShortcuts -new` | Create a new shortcut script |
-| `MyShortcuts -edit` | Add features or custom commands to an existing shortcut |
+| `MyShortcuts -edit` / `-e` | Add features or custom commands to an existing shortcut |
 | `MyShortcuts -list` | List all available shortcuts |
 | `MyShortcuts -d` | Open the MyShortcuts folder in the terminal and list it |
 | `MyShortcuts -x` | Open the MyShortcuts folder in Windows Explorer |
 | `MyShortcuts -update` | Pull the latest engine files from GitHub |
 | `MyShortcuts -push` / `-p` | Back up the MyShortcuts folder to GitHub (git add, commit, push) |
+| `MyShortcuts -help` / `-h` | Show a summary of all commands (also shown when run with no switch) |
 
 ## Available Features
 

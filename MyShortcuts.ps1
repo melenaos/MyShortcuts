@@ -20,6 +20,9 @@ Checks GitHub for a newer engine version and, if found, downloads and overwrites
 .PARAMETER push
 Backs up the MyShortcuts folder itself to GitHub: runs git add -A, prompts for a commit message, then commits and pushes. Use it after -new/-edit to save your new or changed shortcut scripts to your fork.
 
+.PARAMETER help
+Displays a summary of all available commands and their aliases.
+
 .EXAMPLE
 PS> .\MyShortcuts -d
 
@@ -37,10 +40,13 @@ PS> .\MyShortcuts -new
     [switch]$explorer = $false,
     [Alias('l')]
     [switch]$list = $false,
+    [Alias('e')]
     [switch]$edit = $false,
     [switch]$update = $false,
     [Alias('p')]
-    [switch]$push = $false
+    [switch]$push = $false,
+    [Alias('h')]
+    [switch]$help = $false
  )
 
 
@@ -1184,12 +1190,39 @@ if (-not (Check-EnvPath)) {
     $Env:Path = $PSScriptRoot + ";" + $Env:Path
 }
 
+function Show-Help {
+    Write-Host ""
+    Write-Host "  MyShortcuts - manage your project shortcut scripts" -ForegroundColor DarkGreen
+    Write-Host ""
+    Write-Host "  Usage: MyShortcuts [command]" -ForegroundColor Gray
+    Write-Host ""
+    Write-Host "  -new, -n       " -ForegroundColor Cyan -NoNewline
+    Write-Host "Create a new shortcut script (interactive wizard)."
+    Write-Host "  -edit, -e      " -ForegroundColor Cyan -NoNewline
+    Write-Host "Edit an existing shortcut (add feature / custom command / open in editor)."
+    Write-Host "  -list, -l      " -ForegroundColor Cyan -NoNewline
+    Write-Host "List all available shortcuts."
+    Write-Host "  -directory, -d " -ForegroundColor Cyan -NoNewline
+    Write-Host "Open the MyShortcuts folder in the terminal and list it."
+    Write-Host "  -explorer, -x  " -ForegroundColor Cyan -NoNewline
+    Write-Host "Open the MyShortcuts folder in Windows Explorer."
+    Write-Host "  -update        " -ForegroundColor Cyan -NoNewline
+    Write-Host "Check GitHub for a newer engine version and update in place."
+    Write-Host "  -push, -p      " -ForegroundColor Cyan -NoNewline
+    Write-Host "Back up the MyShortcuts folder to GitHub (git add/commit/push)."
+    Write-Host "  -help, -h      " -ForegroundColor Cyan -NoNewline
+    Write-Host "Show this help."
+    Write-Host ""
+    Write-Host "  Run 'Get-Help MyShortcuts.ps1 -full' for detailed help." -ForegroundColor Gray
+    Write-Host ""
+}
+
 # Get Settings
 $s = Get-Settings
 $editorPath = if ($s.editorPath) { $s.editorPath } else { 'notepad.exe' }
 
 # First-run: prompt for devDirectory if not configured
-if (-not $s.devDirectory -and -not $directory -and -not $explorer -and -not $list -and -not $update -and -not $push) {
+if (-not $s.devDirectory -and -not $directory -and -not $explorer -and -not $list -and -not $update -and -not $push -and -not $help) {
     Write-Host ""
     Write-Host "  Base development folder is not configured." -ForegroundColor DarkYellow
     $devDir = Read-Host -Prompt "  Enter your base development folder (e.g. C:\GitHub)"
@@ -1226,6 +1259,9 @@ elseif ($update){
 elseif ($push){
    Exec-Push
 }
+elseif ($help){
+   Show-Help
+}
 else{
-    Write-Host "Execute 'Get-Help MyShortcut.ps1 -full' to learn more"
+    Show-Help
 }

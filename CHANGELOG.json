@@ -89,5 +89,13 @@
     "notes": [
       "Reverted the -new folder navigator added in 1.0.12: the folder step is back to the original single-select list of your devDirectory's immediate subfolders plus 'Enter custom path...'. A relative name resolves under devDirectory and an absolute path is stored as-is, exactly as before 1.0.12."
     ]
+  },
+  {
+    "version": "1.0.14",
+    "notes": [
+      "Added an -e alias for the -edit command (freed up now that explorer uses -x).",
+      "Added a -help / -h command that prints a summary of all commands and their aliases. Running MyShortcuts with no switch now shows this help instead of a one-line hint.",
+      "The claude feature now runs Claude Code in the current terminal and drops the pushd/popd wrapper, so the terminal stays in the project directory after you exit Claude. Re-create or re-add the feature to a shortcut to pick up the change."
+    ]
   }
 ]
