@@ -25,7 +25,7 @@ Manages the shortcut collection itself. Key capabilities:
 - `-directory` / `-d` opens the MyShortcuts folder in the terminal and lists it. `-explorer` / `-x` opens the same folder in Windows Explorer instead.
 - `-update` checks the `VERSION` file on GitHub against the local one and, if newer, re-downloads the engine files in place (see **Self-update** below).
 - `-push` / `-p` backs up the MyShortcuts folder itself (`$PSScriptRoot`) to GitHub — `git add -A`, prompts for a commit message (aborts if empty), then `git commit` and `git push` (`Exec-Push`). Intended for saving newly created/edited shortcut scripts to the user's fork. It guards on the folder being a git repo and is exempt from the first-run `devDirectory` prompt.
-- The MyShortcuts directory is auto-registered in the user's `PATH` on first run, and the user is prompted for `devDirectory` on first run if it isn't configured yet.
+- `-init` / `-i` adds the MyShortcuts directory to the user's `PATH` (via the User-scope registry value, never the merged session `$Env:Path`) if it isn't already there; it's idempotent and safe to run repeatedly. Every other command just checks `Check-EnvPath` and prints a one-line warning if PATH isn't set up, without modifying anything — PATH registration is opt-in via `-init`, not automatic. The user is prompted for `devDirectory` on first run if it isn't configured yet.
 
 ### Self-update
 

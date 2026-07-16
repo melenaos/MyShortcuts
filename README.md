@@ -23,10 +23,10 @@ Get-ChildItem -Path .\ -Recurse -Filter *.ps1 | Unblock-File
 ### 2. Run it once
 
 ```powershell
-.\MyShortcuts.ps1 -list
+.\MyShortcuts.ps1 -init
 ```
 
-The first run automatically adds the MyShortcuts folder to your `PATH` (open a new terminal afterward to pick it up) and, the first time you use a command that needs it, prompts you for your **base development folder** — where your projects live (e.g. `C:\_developing\GitHub`). This is saved to `settings.json`.
+`-init` adds the MyShortcuts folder to your `PATH` if it isn't already there (open a new terminal afterward to pick it up). It's the only command that touches your `PATH` — every other command just prints a warning if it's missing, so re-running `MyShortcuts` never silently rewrites your `PATH`. The first time you use a command that needs it, you'll also be prompted for your **base development folder** — where your projects live (e.g. `C:\_developing\GitHub`). This is saved to `settings.json`.
 
 You can also edit `settings.json` directly to set:
 - **Editor path** — editor for opening scripts (defaults to `notepad.exe`)
@@ -73,6 +73,7 @@ The built-in feature list lives in `config/features.json` (engine-owned, refresh
 | `MyShortcuts -update` | Pull the latest engine files from GitHub |
 | `MyShortcuts -push` / `-p` | Back up the MyShortcuts folder to GitHub (git add, commit, push) |
 | `MyShortcuts -help` / `-h` | Show a summary of all commands (also shown when run with no switch) |
+| `MyShortcuts -init` / `-i` | Add the MyShortcuts folder to your `PATH`, if it isn't already there |
 
 ## Available Features
 

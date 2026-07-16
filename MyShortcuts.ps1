@@ -23,6 +23,9 @@ Backs up the MyShortcuts folder itself to GitHub: runs git add -A, prompts for a
 .PARAMETER help
 Displays a summary of all available commands and their aliases.
 
+.PARAMETER init
+Adds the MyShortcuts directory to your User PATH if it isn't already there. Every other command just warns if PATH isn't set up; run this to fix it.
+
 .EXAMPLE
 PS> .\MyShortcuts -d
 
@@ -46,7 +49,9 @@ PS> .\MyShortcuts -new
     [Alias('p')]
     [switch]$push = $false,
     [Alias('h')]
-    [switch]$help = $false
+    [switch]$help = $false,
+    [Alias('i')]
+    [switch]$init = $false
  )
 
 
@@ -693,7 +698,8 @@ function Get-Settings {
 }
 
 function Check-EnvPath {
-    $pathVars = $Env:Path.Split(';')
+    $userPath = [Environment]::GetEnvironmentVariable("Path", "User")
+    $pathVars = $userPath.Split(';')
     ForEach ($path in $pathVars){
         if($path.TrimEnd('\') -eq $PSScriptRoot){
             return $true;
@@ -1184,10 +1190,20 @@ function Exec-List{
 # --  Main  --
 # ------------
 
-# Auto-register MyShortcuts directory in PATH on first run
-if (-not (Check-EnvPath)) {
-    [Environment]::SetEnvironmentVariable("Path", $PSScriptRoot + ";" + $Env:Path, "User")
+# Warn (but don't touch PATH) if the MyShortcuts directory isn't registered
+if (-not $init -and -not (Check-EnvPath)) {
+    Write-Host "  MyShortcuts is not in your PATH. Run 'MyShortcuts -init' to add it." -ForegroundColor DarkYellow
+}
+
+function Exec-Init {
+    if (Check-EnvPath) {
+        Write-Host "  MyShortcuts is already in your PATH." -ForegroundColor DarkGreen
+        return
+    }
+    $userPath = [Environment]::GetEnvironmentVariable("Path", "User")
+    [Environment]::SetEnvironmentVariable("Path", $PSScriptRoot + ";" + $userPath, "User")
     $Env:Path = $PSScriptRoot + ";" + $Env:Path
+    Write-Host "  Added MyShortcuts to your PATH." -ForegroundColor DarkGreen
 }
 
 function Show-Help {
@@ -1212,6 +1228,8 @@ function Show-Help {
     Write-Host "Back up the MyShortcuts folder to GitHub (git add/commit/push)."
     Write-Host "  -help, -h      " -ForegroundColor Cyan -NoNewline
     Write-Host "Show this help."
+    Write-Host "  -init, -i      " -ForegroundColor Cyan -NoNewline
+    Write-Host "Add the MyShortcuts folder to your PATH, if it isn't already there."
     Write-Host ""
     Write-Host "  Run 'Get-Help MyShortcuts.ps1 -full' for detailed help." -ForegroundColor Gray
     Write-Host ""
@@ -1222,7 +1240,7 @@ $s = Get-Settings
 $editorPath = if ($s.editorPath) { $s.editorPath } else { 'notepad.exe' }
 
 # First-run: prompt for devDirectory if not configured
-if (-not $s.devDirectory -and -not $directory -and -not $explorer -and -not $list -and -not $update -and -not $push -and -not $help) {
+if (-not $s.devDirectory -and -not $directory -and -not $explorer -and -not $list -and -not $update -and -not $push -and -not $help -and -not $init) {
     Write-Host ""
     Write-Host "  Base development folder is not configured." -ForegroundColor DarkYellow
     $devDir = Read-Host -Prompt "  Enter your base development folder (e.g. C:\GitHub)"
@@ -1261,6 +1279,9 @@ elseif ($push){
 }
 elseif ($help){
    Show-Help
+}
+elseif ($init){
+   Exec-Init
 }
 else{
     Show-Help

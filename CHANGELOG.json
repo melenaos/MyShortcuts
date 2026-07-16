@@ -97,5 +97,12 @@
       "Added a -help / -h command that prints a summary of all commands and their aliases. Running MyShortcuts with no switch now shows this help instead of a one-line hint.",
       "The claude feature now runs Claude Code in the current terminal and drops the pushd/popd wrapper, so the terminal stays in the project directory after you exit Claude. Re-create or re-add the feature to a shortcut to pick up the change."
     ]
+  },
+  {
+    "version": "1.0.15",
+    "notes": [
+      "Fixed PATH registration duplicating the entire Machine PATH into the User PATH: Check-EnvPath now reads the User-scope registry value directly instead of the merged session $Env:Path (which combines Machine + User). Does not retroactively clean an already-polluted User PATH.",
+      "PATH registration is no longer automatic on every run. Added -init / -i: run it to add the MyShortcuts folder to your PATH if it isn't already there. Every other command now just prints a one-line warning when PATH isn't set up, instead of silently rewriting it."
+    ]
   }
 ]
